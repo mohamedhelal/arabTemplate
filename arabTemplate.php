@@ -599,12 +599,12 @@ class ArabTemplate
 	{
 		$this->rdelim  = preg_quote($this->rdelim);
 		$this->ldelim  = preg_quote($this->ldelim);
-		$setvar_val = 
-		[
-		'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
-		'(\+{2})+(\$[\w\.]+)',
-		 '(\-{2})+(\$[\w\.]+)'
-		];
+		$setvar_val = array
+		(
+			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
+			'(\+{2})+(\$[\w\.]+)',
+			 '(\-{2})+(\$[\w\.]+)'
+		);
 		$code = preg_replace_callback('#{PHP}(?:(?R)|(.*?)){/php}#is',array($this,'_reset_php_code'), $code);
 		$code = preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
 		$code = preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
@@ -624,24 +624,24 @@ class ArabTemplate
 	 */
 	private function _chang_Syntax($code)
 	{
-		$Syntax   =
-		[
-		'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
-		'(IF)\s+([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
-		'(IF|ELSEIF)([^{}]+)',
-		'(\/IF)',
-		'(\/FOREACH)',
-		'(ELSE)',
-		'(FOREACHELSE)',
-		'(FOR)\s+(.*|(?R)*)',
-		'(\/FOR)'
-		];
-		$system_function =
-		[
-		'assign',
-		'include',
-		'fetch'
-		];
+		$Syntax   = array
+		(
+			'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
+			'(IF)\s+([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
+			'(IF|ELSEIF)([^{}]+)',
+			'(\/IF)',
+			'(\/FOREACH)',
+			'(ELSE)',
+			'(FOREACHELSE)',
+			'(FOR)\s+(.*|(?R)*)',
+			'(\/FOR)'
+		);
+		$system_function = array
+		(
+			'assign',
+			'include',
+			'fetch'
+		);
 		$code = preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $Syntax).')\s*'.$this->rdelim.'/i', array(&$this,'_chack_item_type'), $code);
 		 $code = preg_replace_callback('/'.$this->ldelim.'\s*('.implode('|', $system_function).')\s+([^'.$this->ldelim.$this->rdelim.']+)\s*'.$this->rdelim.'/i', array(&$this,'_system_function'), $code);
 		return $code;
@@ -897,7 +897,7 @@ class ArabTemplate
 	private  function _reset_var_val($matchs)
 	{
 		
-		$tags  = [];
+		$tags  = array();
 		foreach ($matchs as $mat)
 		{
 			if(!empty($mat))
@@ -1022,13 +1022,14 @@ class ArabTemplate
 	 */
 	private function _get_attr($var)
 	{
-		$tags 		= [];
-		$pattrens   = 
-		[
+		$tags 		= array();
+		$pattrens   = array
+		(
+		
 			'(?:([\w\$]+)\s*=\s*(?:[\'|"]?)(?:([^\'"\s]+)|(?R)*)(?:[\'|"]?))',
 			'(?:(?:[\'"])(?:([^\'"]+)|(?R)*)(?:[\'"]))',
 			'([^\s\'\"]+)'
-		];
+		);
 		if(preg_match_all('/'.implode('|', $pattrens).'/', $var,$matchs))
 		{
 			foreach ($matchs[1] as $index => $val)
@@ -1172,8 +1173,8 @@ class ArabTemplate
 	{
 		if(preg_match_all('/(?:(\$[\w]+)\s*([=]+)\s*(?:([^\'";,]+)|(?R)*))+/', $matchs[1],$sub_matchs))
 		{
-			$for = [];
-			$vars = [];
+			$for = array();
+			$vars = array();
 			foreach ($sub_matchs[1] as $var)
 			{
 				if(!empty($var) && strpos($var, '$') === 0 && !isset($this->varTple[ltrim($var,'$')]))
