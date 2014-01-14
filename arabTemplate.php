@@ -58,6 +58,16 @@ class ArabTemplate
 	private 		$allowOutPutFile		= false;
 	/**
 	 * #-------------------------------------------------------------------
+	 *  بداية و نهاية البحث عن  البيانات التى يجب تغيرها فى القالب
+	 * عند تغير بداية البحث و نهاية يجب عليك اختيار  عناص لن تستخدمها فى القالب ابدا
+	 * #-------------------------------------------------------------------
+	 */
+	// متغير بداية البحث من 
+	private 		$ldelim					= '{{';
+	// متغير نهاية البحث
+	private 		$rdelim					= '}}';
+	/**
+	 * #-------------------------------------------------------------------
 	 * ثوابت 
 	 * #-------------------------------------------------------------------
 	 */
@@ -587,6 +597,8 @@ class ArabTemplate
 	 */
 	private function compileCode($code)
 	{
+		$this->rdelim  = preg_quote($this->rdelim);
+		$this->ldelim  = preg_quote($this->ldelim);
 		$setvar_val = 
 		[
 		'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
@@ -594,12 +606,12 @@ class ArabTemplate
 		 '(\-{2})+(\$[\w\.]+)'
 		];
 		$code = preg_replace_callback('#{PHP}(?:(?R)|(.*?)){/php}#is',array($this,'_reset_php_code'), $code);
-		$code = preg_replace('/\{\*.*\*\}/s','', $code);
-		$code = preg_replace('/\{\s*(break|continue)\s*\}/i', '<?php $1;?>', $code);
+		$code = preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
+		$code = preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
 		$code = $this->_chang_Syntax($code);
-		$code = preg_replace_callback('/\{\s*(?:'.implode('|', $setvar_val).')\s*\}/', array(&$this,'_reset_var_val'), $code);
-		$code = preg_replace_callback('/\{(\$?[\w:]+)\(([^{}]+)\)\}/', array(&$this,'_print_function_var'), $code);
-		$code = preg_replace_callback('/\{(\$?[\w]+[^{}]*)\}/', array(&$this,'_print_var'), $code);
+		$code = preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
+		$code = preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\(([^'.$this->ldelim.$this->rdelim.']+)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
+		$code = preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+[^'.$this->ldelim.$this->rdelim.']*)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
 		$code = str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
 		return $code;
 	}
@@ -630,8 +642,8 @@ class ArabTemplate
 		'include',
 		'fetch'
 		];
-		$code = preg_replace_callback('/\{\s*(?:'.implode('|', $Syntax).')\s*\}/i', array(&$this,'_chack_item_type'), $code);
-		 $code = preg_replace_callback('/\{\s*('.implode('|', $system_function).')\s+([^\{\}]+)\s*\}/i', array(&$this,'_system_function'), $code);
+		$code = preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $Syntax).')\s*'.$this->rdelim.'/i', array(&$this,'_chack_item_type'), $code);
+		 $code = preg_replace_callback('/'.$this->ldelim.'\s*('.implode('|', $system_function).')\s+([^'.$this->ldelim.$this->rdelim.']+)\s*'.$this->rdelim.'/i', array(&$this,'_system_function'), $code);
 		return $code;
 	}
 	/**
@@ -859,7 +871,6 @@ class ArabTemplate
 	 */
 	private function _print_var($matchs)
 	{
-	
 		if(preg_match('/^([\w]+)::(.+)/', $matchs[1],$sub_matchs))
 		{
 			$sub_var = $sub_matchs[2];
