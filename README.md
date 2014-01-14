@@ -175,6 +175,17 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 ```
 
+
+استخدام الشروط القصيرة
+
+```code
+{if $var == 'mohamed'?true:false}
+```
+ دمج المتغيرات
+```code
+{$var."MohamedHelal"}
+```
+
 التحقق من وجود ملف الكاش
 
 ```code
