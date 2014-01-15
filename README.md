@@ -69,48 +69,48 @@ $artpl->assign('obj', 'MyTest' );
 استخدام المصفوفات داخل القالب
 
 ```code
-{$row.key}
-{$row[key]}
-{$row[$key.name]}
+{{$row.key}}
+{{$row[key]}}
+{{$row[$key.name]}}
 ```
 
 استخدام الكلاسات داخل القالب
 
 ```code
-{$obj->property}
-{MyClass::$property}
-{MyClass::$property.key.name}
-{$obj::$property}
-{$obj::$property.key.name}
+{{$obj->property}}
+{{MyClass::$property}}
+{{MyClass::$property.key.name}}
+{{$obj::$property}}
+{{$obj::$property.key.name}}
 ```
 
 استخدام الدوال فى القالب
 
 ```code
-{myName($row,'mohamed')}
-{$obj->method('name')}
-{MyClass::method('name')}
-{$obj::method('name')}}
+{{myName($row,'mohamed')}}
+{{$obj->method('name')}}
+{{MyClass::method('name')}}
+{{$obj::method('name')}}
 ```
 
 استدعاء قوالب داخل القالب
 
 ```code
-{include file="index.tpl" caching}
+{{include file="index.tpl" caching}}
 // تمرير
-{include file="index.tpl" title="MyPageTitle" caching}
+{{include file="index.tpl" title="MyPageTitle" caching}}
 ```
 
 انشاء المتغيرات فى القالب
 
 ```code
-{$name = 'mohamed helal'}
-{$name = getTemplateVars('name')}
-{$i = 2}
-{++$i}
-{--$i}
-{$i *= 2}
-{assign var="my" value=" MyTest::$array.names.first"}
+{{$name = 'mohamed helal'}}
+{{$name = getTemplateVars('name')}}
+{{$i = 2}}
+{{++$i}}
+{{--$i}}
+{{$i *= 2}}
+{{assign var="my" value=" MyTest::$array.names.first"}}
 ```
 
 استخدام داله باسم اخر  فى القالب
@@ -118,60 +118,60 @@ $artpl->assign('obj', 'MyTest' );
 ```code
 
 $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
-{ReturnArray($rows)}
-{$myfunc = ReturnArray($rows)}
+{{ReturnArray($rows)}}
+{{$myfunc = ReturnArray($rows)}}
 ```
 
 كتابة كود phpداخل القالب
 
 ```code
-{php}
+{{php}}
 	$var ='myCodeTest';
 	echo $var ;
-{/php}
+{{/php}}
 ```
 
 		
 استخدام الوب foreach
 
 ```code
-{foreach $rows as $row}
-	{$row@key}
-   {foreachelse}
-{/foreach}
+{{foreach $rows as $row}}
+	{{$row@key}}
+   {{foreachelse}{
+{{/foreach}}
 
-{foreach $rows as $key => $val}
-   {foreachelse}
-{/foreach}
+{{foreach $rows as $key => $val}}
+   {{foreachelse}}
+{{/foreach}}
 ```
 
 استخدام for
 
 ```code
-	{for $i = 0;$i < 10;$i++}
-		{$i}
-	{/for}
+	{{for $i = 0;$i < 10;$i++}}
+		{{$i}}
+	{{/for}}
 ```
 
 استخدام for متعدده
 
 ```code
-	{for $i = 0,$j = 0;$i < 10,$j < 10;$i++,$j+=2}
-		{$i}
-		{$j}
-	{/for}
+	{{for $i = 0,$j = 0;$i < 10,$j < 10;$i++,$j+=2}}
+		{{$i}}
+		{{$j}}
+	{{/for}}
 ```
 
 استخدام الشروط داخل القالب
 
 ```code
-{if $name =="mohamed"}
+{{if $name =="mohamed"}}
 // do same thing
-{elseif $name =="helal"}
+{{elseif $name =="helal"}}
 // do same thing
-{else}
+{{else}}
 // do same thing
-{/if}
+{{/if}}
 
 ```
 
@@ -179,11 +179,11 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 استخدام الشروط القصيرة
 
 ```code
-{if $var == 'mohamed'?true:false}
+{{if $var == 'mohamed'?true:false}}
 ```
  دمج المتغيرات
 ```code
-{$var."MohamedHelal"}
+{{$var."MohamedHelal"}}
 ```
 
 التحقق من وجود ملف الكاش
