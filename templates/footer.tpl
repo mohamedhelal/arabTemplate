@@ -1,2 +1,2 @@
-{$title = getTemplateVars('title')}
-<h1>{$title} - footer</h1>
+{{$title = getTemplateVars('title')}}
+<h1>{{$title}} - footer</h1>
