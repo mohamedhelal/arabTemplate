@@ -35,5 +35,5 @@ for ($i = 1 ;$i < 10;$i++)
 }
 $artpl->assign('rows',$rows);
 $artpl->assign('obj', 'MyTest' );
-$artpl->display('index.tpl');
+$artpl->display('index');
 
