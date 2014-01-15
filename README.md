@@ -45,13 +45,13 @@ $artpl->setCacheDir('caches');
 استدعاء القوالب
 
 ```code
-$artpl->display('index.tpl');
+$artpl->display('index');
 ```
 
 // or 
 
 ```code
-echo $artpl->fetch('index.tpl');
+echo $artpl->fetch('index');
 ```
 
 تمرير المتغيرات للقالب
@@ -96,9 +96,9 @@ $artpl->assign('obj', 'MyTest' );
 استدعاء قوالب داخل القالب
 
 ```code
-{{include file="index.tpl" caching}}
+{{include file="index" caching}}
 // تمرير
-{{include file="index.tpl" title="MyPageTitle" caching}}
+{{include file="index" title="MyPageTitle" caching}}
 ```
 
 انشاء المتغيرات فى القالب
@@ -189,11 +189,11 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 التحقق من وجود ملف الكاش
 
 ```code
-	if($artpl->isCached('index.tpl'))
+	if($artpl->isCached('index'))
 	{
 		// do same thing
 	}
-	$artpl->display('index.tpl');
+	$artpl->display('index');
 ```
 
 
