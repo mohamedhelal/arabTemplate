@@ -42,8 +42,8 @@ class ArabTemplate
 	 * #-------------------------------------------------------------------
 	 */
 	private  	    $template_dir			= false;
-	private 	    $compile_dir			= 'Compiles';
-	private 	    $cache_dir				= 'Caches';
+	private 	    $compile_dir			= 'ArCompiles';
+	private 	    $cache_dir				= 'ArCaches';
 	public 			$caching				= false;
 	public 			$cache_lefttime     	= false;
 	public 			$parent					= null;
@@ -56,7 +56,7 @@ class ArabTemplate
 	private 		$lastupdate				= false;
 	private 		$outputFile				= 'output_arabtemplate';
 	private 		$allowOutPutFile		= false;
-	private 		$extensions     		= '.tpl';
+	private         $extensions             = '.tpl';
 	/**
 	 * #-------------------------------------------------------------------
 	 *  بداية و نهاية البحث عن  البيانات التى يجب تغيرها فى القالب
@@ -236,7 +236,7 @@ class ArabTemplate
 	 */
 	public function setCompileDir($compile_dir)
 	{
-		$this->compile_dir = realpath($compile_dir).DS;
+		$this->compile_dir = (is_string($compile_dir) && realpath($compile_dir) != null?realpath($compile_dir).DS:null);
 	}
 	public function getCompileDir()
 	{
@@ -250,7 +250,7 @@ class ArabTemplate
 	 */
 	public function setCacheDir($cache_dir)
 	{
-		$this->cache_dir = realpath($cache_dir).DS;
+		$this->cache_dir = (is_string($cache_dir) && realpath($cache_dir) != null?realpath($cache_dir).DS:null);
 	}
 	public function getCacheDir()
 	{
@@ -264,7 +264,7 @@ class ArabTemplate
 	 */
 	public function setTemplateDir($template_dir)
 	{
-		$this->template_dir = realpath($template_dir).DS;
+		$this->template_dir = (!is_string($template_dir)?null:realpath($template_dir).DS);
 	}
 	public function getTemplateDir()
 	{
@@ -308,22 +308,24 @@ class ArabTemplate
 		{
 			$this->error('Templates Folder \''.$this->template_dir.'\' Not Readable');
 		}
+		else if( empty($this->compile_dir) || !is_dir($this->compile_dir))
+		{
+		    $this->compile_dir = 'ArCompiles'.DS;
+			if(!mkdir($this->compile_dir,777))
+			{
+				$this->error('Unable To Create Compile Folder\''.$this->compile_dir.'\'');
+			}
+		}
+		else if($this->caching === true && !is_dir($this->cache_dir))
+		{
+			$this->cache_dir = 'ArCaches'.DS;
+			if(!mkdir($this->cache_dir,777))
+			{
+				$this->error('Unable To Create Caches Folder\''.$this->cache_dir.'\'');
+			}
+		}
 		else
 		{
-		   if(!is_dir($this->compile_dir))
-			{
-				if(!mkdir($this->compile_dir,777))
-				{
-					$this->error('Unable To Create Compile Folder\''.$this->compile_dir.'\'');
-				}
-			}
-			else if($this->caching === true && !is_dir($this->cache_dir))
-			{
-				if(!mkdir($this->cache_dir,777))
-				{
-					$this->error('Unable To Create Caches Folder\''.$this->cache_dir.'\'');
-				}
-			}
 			if($this->use_database == true)
 			{
 				
@@ -536,7 +538,7 @@ class ArabTemplate
 	 */
 	public function fetch($template  ,$data = array(),$cache_name = null,$cache_lefttime = false,$merge = true)
 	{
-		$tpl = $this->createTemplate($template.$this->extensions  ,$data  ,$cache_name ,$cache_lefttime ,$this,$merge);
+		$tpl = $this->createTemplate($template.(strpos($template, '.') === false?$this->extensions:null)  ,$data  ,$cache_name ,$cache_lefttime ,$this,$merge);
 		ob_start();
 		$tpl->getCompilerFile();
 		return ob_get_clean();
@@ -753,6 +755,7 @@ class ArabTemplate
 	 */
 	private function _chack_var_type($matchs)
 	{
+		
 		if(preg_match('/^[\w]+\-\>.+/', $matchs[1]))
 		{
 			return $this->_change_var_data($matchs[1],true);
@@ -811,7 +814,7 @@ class ArabTemplate
 						$array   = explode('.',$sub_var);
 						$sub_var  = array_shift($array).$this->_change_var_data(implode('.',$array),false,true);
 					}
-					$class = $this->get_var_tpl($sub_matchs[1])->val;
+					$class = $this->varTple[$sub_matchs[1]]->val;
 					$tags[] = (is_object($class)?get_class($class):$class).'::'.$sub_var;
 				}
 				else if(is_numeric($val))
