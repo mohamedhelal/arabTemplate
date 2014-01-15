@@ -72,7 +72,9 @@ class ArabTemplate
 	 * ثوابت 
 	 * #-------------------------------------------------------------------
 	 */
-	public function __construct(){}
+	public function __construct(){
+		$this->allowOutPutFile = $this->allowOutPutFile.'_'.get_called_class();
+	}
 	/**
 	 * #-------------------------------------------------------------------
 	 *  السماح لعمل كاش لجميع الملفات فى ملف واحد
@@ -608,7 +610,7 @@ class ArabTemplate
 			'(\+{2})+(\$[\w\.]+)',
 			 '(\-{2})+(\$[\w\.]+)'
 		);
-		$code = preg_replace_callback('#{PHP}(?:(?R)|(.*?)){/php}#is',array($this,'_reset_php_code'), $code);
+		$code = preg_replace_callback('/'.$this->ldelim.'PHP'.$this->rdelim.'(?:(?R)|(.*?))'.$this->ldelim.'\/php'.$this->rdelim.'/is',array($this,'_reset_php_code'), $code);
 		$code = preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
 		$code = preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
 		$code = $this->_chang_Syntax($code);
