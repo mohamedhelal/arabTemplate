@@ -56,6 +56,7 @@ class ArabTemplate
 	private 		$lastupdate				= false;
 	private 		$outputFile				= 'output_arabtemplate';
 	private 		$allowOutPutFile		= false;
+	private 		$extensions     		= '.tpl';
 	/**
 	 * #-------------------------------------------------------------------
 	 *  بداية و نهاية البحث عن  البيانات التى يجب تغيرها فى القالب
@@ -535,7 +536,7 @@ class ArabTemplate
 	 */
 	public function fetch($template  ,$data = array(),$cache_name = null,$cache_lefttime = false,$merge = true)
 	{
-		$tpl = $this->createTemplate($template  ,$data  ,$cache_name ,$cache_lefttime ,$this,$merge);
+		$tpl = $this->createTemplate($template.$this->extensions  ,$data  ,$cache_name ,$cache_lefttime ,$this,$merge);
 		ob_start();
 		$tpl->getCompilerFile();
 		return ob_get_clean();
