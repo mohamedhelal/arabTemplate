@@ -179,11 +179,61 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 استخدام الشروط القصيرة
 
 ```code
-{{if $var == 'mohamed'?true:false}}
+{{$var == 'mohamed'?true:false}}
 ```
  دمج المتغيرات
 ```code
 {{$var."MohamedHelal"}}
+```
+
+
+
+عمل وراثة للقالب
+
+parent.tpl
+
+```code
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Page Title</title>
+</head>
+<body>
+	{{$extend_body}}
+</body>
+</html>
+```
+son.tpl
+
+لازم يكون ال content
+هو نفسة الى فى  ملف parent.tpl
+extend_body = body
+او سوفا يظهر خطاء
+```code
+
+{{extends file="parent.tpl"}}
+{{content name = "body"}}
+	My Page Content
+{{/content}}
+```
+
+الناتج
+
+```code
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Page Title</title>
+</head>
+<body>
+	
+	My Page Content
+
+</body>
+</html>
 ```
 
 التحقق من وجود ملف الكاش
@@ -195,6 +245,8 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 	}
 	$artpl->display('index');
 ```
+
+
 
 
 استخدام  القوالب من قاعدة البيانات
