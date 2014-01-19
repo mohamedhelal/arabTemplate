@@ -424,6 +424,7 @@ class ArabTemplate
 				return true;
 			}
 		}
+		$this->getTemplate();
 		$this->writeCompiler();
 		require_once($this->createCompileName());
 		$callname = 'template_content_'.md5($this->createCompileName());
@@ -510,7 +511,7 @@ class ArabTemplate
 			{
 				$tpl->setResource($this->use_database_function);
 			}
-			$tpl->caching           	= ($parent->caching == false && $cache_name === true?true:($this->caching || $parent->caching));
+			$tpl->caching           	= ($parent->caching == false && $cache_name === true?true:($cache_name === false?false:($this->caching || $parent->caching)));
 			$tpl->filename 				= $template;
 			$tpl->cache_lefttime 		= $cache_lefttime;
 			$tpl->cache_name            = ($cache_name != false && is_string($cache_name)?$cache_name:null);
@@ -604,6 +605,7 @@ class ArabTemplate
 	{
 		$this->rdelim  = preg_quote($this->rdelim);
 		$this->ldelim  = preg_quote($this->ldelim);
+		$code		   = preg_replace_callback('/'.$this->ldelim.'\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*'.$this->rdelim.'(.*)/is', array(&$this,'_set_extend_data'), $code);
 		$setvar_val = array
 		(
 			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
@@ -632,7 +634,7 @@ class ArabTemplate
 		$Syntax   = array
 		(
 			'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
-			'(IF)\s+([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
+			'([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
 			'(IF|ELSEIF)([^{}]+)',
 			'(\/IF)',
 			'(\/FOREACH)',
@@ -964,6 +966,10 @@ class ArabTemplate
 		{
 			return $this->$method_name(array_slice($matchs, 1));
 		}
+		else if(count($matchs) == 4 && strpos($matchs[0], ':') !== false && strpos($matchs[0], '?') !== false)
+		{
+			return $this->_set_call_ShortIf(array_slice($matchs, 1));
+		}
 	}
 	/**
 	 * #-------------------------------------------------------------------
@@ -1131,11 +1137,12 @@ class ArabTemplate
 	 *  تغير الشرط اف
 	 * #-------------------------------------------------------------------
 	 */
+	private function _set_call_ShortIf($matchs)
+	{
+		return '<?php echo (('.$this->_replace_var($matchs[0]).'?'.$this->_replace_var($matchs[1]).':'.$this->_replace_var($matchs[2]).'));?>';
+	}
 	private function _set_call_If($matchs)
 	{
-		if(count($matchs) == 4){
-			return '<?php echo (('.$this->_replace_var($matchs[1]).'?'.$this->_replace_var($matchs[2]).':'.$this->_replace_var($matchs[3]).'));?>';
-		}
 		$this->open_tag('if', array('from' => 'if'));
 		return '<?php if('.$this->_replace_var($matchs[1]).'){?>';
 	}
@@ -1217,9 +1224,35 @@ class ArabTemplate
 			return $data['data'];
 		}
 	}
-	public function clearTemplateObject()
+	public function clearTemplateObject(){}
+	private function _set_extend_data($matchs)
 	{
+		$layoutfilename = $matchs[1].(strpos($matchs[1], '.') === false?$this->extensions:null);
+		$layoutcode     = false;
+		if($this->use_database == true)
+		{
 		
+			$template_data = call_user_func($this->use_database_function,$layoutfilename);
+			if(is_array($template_data) && isset($template_data['code'],$template_data['lastupdate']))
+			{
+				$layoutfilename = $template_data['code'];
+				$layoutcode     = true;
+			}
+		}
+		if($layoutcode == false && is_file($this->template_dir.$layoutfilename))
+		{
+			$layoutfilename = file_get_contents($this->template_dir.$layoutfilename);
+		}
+		else if($layoutcode == false &&  is_file($layoutfilename))
+		{
+			$layoutfilename = file_get_contents($layoutfilename);
+		}
+		else if($layoutcode == false)
+		{
+			$this->error('Template File  \''.$layoutfilename.' \' Not Found');
+		}
+		preg_match('/'.$this->ldelim.'\s*content\s+name\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'(.+)'.$this->ldelim.'\s*\/content\s*'.$this->rdelim.'/is', $matchs[2], $data);
+		return  preg_replace('/'.$this->ldelim.'\s*\$extend_'.$data[1].'\s*'.$this->rdelim.'/i', $data[2] , $layoutfilename);
 	}
 }
 /**
