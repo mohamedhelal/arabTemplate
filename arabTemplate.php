@@ -732,9 +732,13 @@ class ArabTemplate
 			$print = $sub_matchs[1].'::'.$sub_var;unset($sub_var);
 			return $print;
 		}
-		else 
+		elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0]))
 		{
 			return  preg_replace_callback('/([\w:]+)\((.*)\)/', array($this,'reset_function_tpl'), $matchs[0]);
+		}
+		else 
+		{
+			return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)/', array($this,'_chack_var_type'), $matchs[0]);
 		}
 	}
 	/**
@@ -758,7 +762,6 @@ class ArabTemplate
 	 */
 	private function _chack_var_type($matchs)
 	{
-		
 		if(preg_match('/^[\w]+\-\>.+/', $matchs[1]))
 		{
 			return $this->_change_var_data($matchs[1],true);
@@ -787,7 +790,7 @@ class ArabTemplate
 		{
 			if(!empty($val))
 			{
-				if($return == false && $index == 0 &&  preg_match('/^[\w]+$/i', $val))
+				if($return == false && $index == 0 &&  preg_match('/^[\w_]+$/i', $val))
 				{
 					if($val != '_artpl')
 					{
@@ -799,17 +802,17 @@ class ArabTemplate
 					}
 					
 				}
-				else if($return == false && $index == 0 &&  preg_match('/(^[\w]+)@(.+)/i', $val,$matchs))
+				else if($return == false && $index == 0 &&  preg_match('/(^[\w_]+)@(.+)/i', $val,$matchs))
 				{
 					$tags[] = $this->get_var_tpl($matchs[1]).'->'.$this->_replace_var(str_replace('&', $spilter, $matchs[2]));
 				}
-				else if($return == false && $index == 0 && preg_match('/^([\w]+)(\[.+\])/', $val,$matchs))
+				else if($return == false && $index == 0 && preg_match('/^([\w_]+)(\[.+\])/', $val,$matchs))
 				{
 					
 					$sub_var = preg_replace_callback('/\[(([^\[\]]*|(?R)*)*)\]/', array(&$this,'_replace_sub_var'), str_replace('&', $spilter, $matchs[2]));
 					$tags[]  = $this->get_var_tpl($matchs[1]).'->val'.$sub_var;
 				}
-				else if($return == false && $index == 0 && preg_match('/^([\w]+)::(.+)/', $val,$sub_matchs))
+				else if($return == false && $index == 0 && preg_match('/^([\w_]+)::(.+)/', $val,$sub_matchs))
 				{
 					$sub_var = str_replace('&', $spilter, $sub_matchs[2]);
 					if(strpos($sub_var, '.'))
@@ -846,7 +849,6 @@ class ArabTemplate
 				}
 			}
 		}
-		
 		if($isObject == true)
 		{
 			return implode('->', $tags);
