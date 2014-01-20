@@ -424,7 +424,6 @@ class ArabTemplate
 				return true;
 			}
 		}
-		$this->getTemplate();
 		$this->writeCompiler();
 		require_once($this->createCompileName());
 		$callname = 'template_content_'.md5($this->createCompileName());
@@ -1252,6 +1251,10 @@ class ArabTemplate
 			$this->error('Template File  \''.$layoutfilename.' \' Not Found');
 		}
 		preg_match('/'.$this->ldelim.'\s*content\s+name\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'(.+)'.$this->ldelim.'\s*\/content\s*'.$this->rdelim.'/is', $matchs[2], $data);
+		if(!isset($data[1],$data[2]))
+		{
+			return $matchs[2];
+		}
 		return  preg_replace('/'.$this->ldelim.'\s*\$extend_'.$data[1].'\s*'.$this->rdelim.'/i', $data[2] , $layoutfilename);
 	}
 }
