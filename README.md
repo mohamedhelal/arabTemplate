@@ -161,6 +161,11 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 		{{$j}}
 	{{/for}}
 ```
+استخدام break|continue
+```code 
+{{break|continue}}
+```
+
 
 استخدام الشروط داخل القالب
 
