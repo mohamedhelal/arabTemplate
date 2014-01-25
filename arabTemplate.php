@@ -617,6 +617,7 @@ class ArabTemplate
 		$this->rdelim  = preg_quote($this->rdelim);
 		$this->ldelim  = preg_quote($this->ldelim);
 		$code		   = preg_replace_callback('/'.$this->ldelim.'\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*'.$this->rdelim.'(.*)/is', array(&$this,'_set_extend_data'), $code);
+		$code 		   = preg_replace('/'.$this->ldelim.'\s*extend_([\w]+)\s*'.$this->rdelim.'(.+?|(?R))'.$this->ldelim.'\s*\/extend\s*'.$this->rdelim.'/is','$2', $code);
 		$setvar_val    = array
 		(
 			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
@@ -1263,12 +1264,16 @@ class ArabTemplate
 		{
 			$this->error('Template File  \''.$layoutfilename.' \' Not Found');
 		}
-		preg_match('/'.$this->ldelim.'\s*content\s+name\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'(.+)'.$this->ldelim.'\s*\/content\s*'.$this->rdelim.'/is', $matchs[2], $data);
+		preg_match_all('/'.$this->ldelim.'\s*content\s+name\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'(.+?|(?R)*)'.$this->ldelim.'\s*\/content\s*'.$this->rdelim.'/is', $matchs[2], $data);
 		if(!isset($data[1],$data[2]))
 		{
 			return $matchs[2];
 		}
-		return  preg_replace('/'.$this->ldelim.'\s*\$extend_'.$data[1].'\s*'.$this->rdelim.'/i', $data[2] , $layoutfilename);
+		foreach ($data[1] as $index => $name)
+		{
+			$layoutfilename =  preg_replace('/'.$this->ldelim.'\s*extend_'.$name.'\s*'.$this->rdelim.'(.+?|(?R))'.$this->ldelim.'\s*\/extend\s*'.$this->rdelim.'/is', $data[2][$index] , $layoutfilename);
+		}
+		return $layoutfilename;
 	}
 }
 /**
