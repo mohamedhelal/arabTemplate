@@ -220,7 +220,7 @@ extend_body = body
 او سوفا يظهر خطاء
 ```code
 
-
+{{extends file="parent"}}
 {{content name = "header"}}
 	My Extend Page Header
 {{/content}}
