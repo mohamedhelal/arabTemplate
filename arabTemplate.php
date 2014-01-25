@@ -57,6 +57,7 @@ class ArabTemplate
 	private 		$outputFile				= 'output_arabtemplate';
 	private 		$allowOutPutFile		= false;
 	private         $extensions             = '.tpl';
+	private 		$function_prefix		= 'template_content_';
 	/**
 	 * #-------------------------------------------------------------------
 	 *  بداية و نهاية البحث عن  البيانات التى يجب تغيرها فى القالب
@@ -84,6 +85,16 @@ class ArabTemplate
 	{
 		ob_start();
 		$this->allowOutPutFile = true;
+	}
+	/**
+	 #--------------------------------------------------------------------------------------
+	 # اسم داله القالب
+	 #--------------------------------------------------------------------------------------
+	 # @return string
+	 */
+	private function createTemplateFunctionName()
+	{
+		return ($this->function_prefix.md5($this->createCompileName()));
 	}
 	/**
 	 * #-------------------------------------------------------------------
@@ -371,12 +382,11 @@ class ArabTemplate
 			$this->source = file_get_contents($this->filename);
 		}
 		$source = $this->compileCode($this->source);
-		$callname = 'template_content_'.md5($this->createCompileName());
 		$data   = "<?php \n/**\n * Create By ArabTemplate version 8";
 		$data  .= "\n * File Name : $filename\n * Create Date : ".date('d/m/Y')."\n */ \n";
 		$data  .= "\nif(!defined('ARAB_TEMPLATE')) exit('no direct access allowed');";
 		$data  .= "\n// File Content Function ";
-		$data  .= "\nif(!function_exists('$callname')){\n function $callname(\$_artpl){?>\n";
+		$data  .= "\nif(!function_exists('".$this->createTemplateFunctionName()."')){\n function ".$this->createTemplateFunctionName()."(\$_artpl){?>\n";
 		$data  .= $source."\n<?php \$_artpl->clearAssign();} } ?>";
 		file_put_contents($this->createCompileName(), $data);
 		return true;
@@ -415,18 +425,21 @@ class ArabTemplate
 			}
 			else
 			{
-				$callname = 'template_content_'.md5($this->createCompileName());
-				if(!function_exists($callname))
+				if(!function_exists($this->createTemplateFunctionName()))
 				{
 					require_once($this->createCompileName());
 				}
-				echo $callname($this);
-				return true;
+				else
+				{
+					$callname = $this->createTemplateFunctionName();
+					echo $callname($this);
+					return true;
+				}
 			}
 		}
 		$this->writeCompiler();
 		require_once($this->createCompileName());
-		$callname = 'template_content_'.md5($this->createCompileName());
+		$callname = $this->createTemplateFunctionName();
 		echo $callname($this);
 		return true;
 	}
@@ -526,7 +539,6 @@ class ArabTemplate
 		{
 			$tpl->assign($data);
 		}
-		
 		return $tpl;
 	}
 	/**
@@ -568,11 +580,11 @@ class ArabTemplate
 	{
 		$content = ob_get_clean();
 		if(
-		  $this->caching === true && 
-		  ((!is_subclass_of($this, 'ArabTemplate') && $this->allowOutPutFile === true) ||
-		 (is_object($this->parent)  && $this->allowOutPutFile === false)) || 
-		 (is_subclass_of($this, 'ArabTemplate')  && !($this instanceof ArabTemplateFile) && $this->allowOutPutFile === true)
-		)
+			  $this->caching === true && 
+			  ((!is_subclass_of($this, 'ArabTemplate') && $this->allowOutPutFile === true) ||
+			  (is_object($this->parent)  && $this->allowOutPutFile === false)) || 
+			  (is_subclass_of($this, 'ArabTemplate')  && !($this instanceof ArabTemplateFile) && $this->allowOutPutFile === true)
+		  )
 		{
 			$cache = ($this->filename == false && $this->allowOutPutFile == true?$this->outputFile:false);
 			file_put_contents($this->createCompileName('cache',$cache), $content);
@@ -605,20 +617,20 @@ class ArabTemplate
 		$this->rdelim  = preg_quote($this->rdelim);
 		$this->ldelim  = preg_quote($this->ldelim);
 		$code		   = preg_replace_callback('/'.$this->ldelim.'\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*'.$this->rdelim.'(.*)/is', array(&$this,'_set_extend_data'), $code);
-		$setvar_val = array
+		$setvar_val    = array
 		(
 			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
 			'(\+{2})+(\$[\w\.]+)',
 			 '(\-{2})+(\$[\w\.]+)'
 		);
-		$code = preg_replace_callback('/'.$this->ldelim.'PHP'.$this->rdelim.'(?:(?R)|(.*?))'.$this->ldelim.'\/php'.$this->rdelim.'/is',array($this,'_reset_php_code'), $code);
-		$code = preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
-		$code = preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
-		$code = $this->_chang_Syntax($code);
-		$code = preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
-		$code = preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\(([^'.$this->ldelim.$this->rdelim.']+)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
-		$code = preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+[^'.$this->ldelim.$this->rdelim.']*)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
-		$code = str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'PHP'.$this->rdelim.'(?:(?R)|(.*?))'.$this->ldelim.'\/php'.$this->rdelim.'/is',array($this,'_reset_php_code'), $code);
+		$code 			= preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
+		$code 			= preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
+		$code 			= $this->_chang_Syntax($code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\(([^'.$this->ldelim.$this->rdelim.']+)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+[^'.$this->ldelim.$this->rdelim.']*)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
+		$code 			= str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
 		return $code;
 	}
 	/**
@@ -630,7 +642,7 @@ class ArabTemplate
 	 */
 	private function _chang_Syntax($code)
 	{
-		$Syntax   = array
+		$Syntax   		= array
 		(
 			'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
 			'([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
@@ -648,8 +660,8 @@ class ArabTemplate
 			'include',
 			'fetch'
 		);
-		$code = preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $Syntax).')\s*'.$this->rdelim.'/i', array(&$this,'_chack_item_type'), $code);
-		 $code = preg_replace_callback('/'.$this->ldelim.'\s*('.implode('|', $system_function).')\s+([^'.$this->ldelim.$this->rdelim.']+)\s*'.$this->rdelim.'/i', array(&$this,'_system_function'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $Syntax).')\s*'.$this->rdelim.'/i', array(&$this,'_chack_item_type'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*('.implode('|', $system_function).')\s+([^'.$this->ldelim.$this->rdelim.']+)\s*'.$this->rdelim.'/i', array(&$this,'_system_function'), $code);
 		return $code;
 	}
 	/**
@@ -671,7 +683,6 @@ class ArabTemplate
 	 */
 	public function reset_function_tpl($matchs)
 	{
-		
 		$function_name = $matchs[1];$function_args = $matchs[2];
 		if(function_exists($function_name))
 		{
