@@ -238,11 +238,13 @@ extend_body = body
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My Page Title</title>
+<title>
+	My Extend Page Header
+</title>
 </head>
 <body>
 	
-	My Page Content
+	My Extend Page Content
 
 </body>
 </html>
