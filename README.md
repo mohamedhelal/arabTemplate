@@ -198,17 +198,19 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 parent.tpl
 
 ```code
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>My Page Title</title>
+<title>{{extend_header}}My Default Page  Title {{/extend}}</title>
 </head>
 <body>
-	{{$extend_body}}
+	{{extend_body}}
+		My Default Page  Content
+	{{/extend}}
 </body>
 </html>
+
 ```
 son.tpl
 
@@ -218,9 +220,14 @@ extend_body = body
 او سوفا يظهر خطاء
 ```code
 
-{{extends file="parent.tpl"}}
+
+{{content name = "header"}}
+	My Extend Page Header
+{{/content}}
+
+
 {{content name = "body"}}
-	My Page Content
+	My Extend Page Content
 {{/content}}
 ```
 
