@@ -618,6 +618,7 @@ class ArabTemplate
 		$this->ldelim  = preg_quote($this->ldelim);
 		$code		   = preg_replace_callback('/'.$this->ldelim.'\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*'.$this->rdelim.'(.*)/is', array(&$this,'_set_extend_data'), $code);
 		$code 		   = preg_replace('/'.$this->ldelim.'\s*extend_([\w]+)\s*'.$this->rdelim.'(.+?|(?R))'.$this->ldelim.'\s*\/extend\s*'.$this->rdelim.'/is','$2', $code);
+		$code		   = preg_replace('/'.$this->ldelim.'\s*INCLUDE_PHP\s+FILE\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'/i','<?php include("\\1");?>', $code);
 		$setvar_val    = array
 		(
 			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
@@ -625,12 +626,12 @@ class ArabTemplate
 			 '(\-{2})+(\$[\w\.]+)'
 		);
 		$code 			= preg_replace_callback('/'.$this->ldelim.'PHP'.$this->rdelim.'(?:(?R)|(.*?))'.$this->ldelim.'\/php'.$this->rdelim.'/is',array($this,'_reset_php_code'), $code);
-		$code 			= preg_replace('/'.$this->ldelim.'\*.*\*'.$this->rdelim.'/s','', $code);
+		$code 			= preg_replace('/'.$this->ldelim.'\*.*?\*'.$this->rdelim.'/s','', $code);
 		$code 			= preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
 		$code 			= $this->_chang_Syntax($code);
 		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
-		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\(([^'.$this->ldelim.$this->rdelim.']+)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
-		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+[^'.$this->ldelim.$this->rdelim.']*)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\((.+?)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+.*?)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
 		$code 			= str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
 		return $code;
 	}
@@ -647,7 +648,7 @@ class ArabTemplate
 		(
 			'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
 			'([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
-			'(IF|ELSEIF)([^{}]+)',
+			'(IF|ELSEIF)([^\{\}]+)',
 			'(\/IF)',
 			'(\/FOREACH)',
 			'(ELSE)',
@@ -725,15 +726,19 @@ class ArabTemplate
 	 */
 	private function _replace_var($var)
 	{
-		return  preg_replace_callback('/(\$[\w\-\>\.\[\]\:\$@]+)|([\w:]+\(([^\(\)]*|(?R))*\))|([\w\-\>\.\[\]\:\$@]+)/', array($this,'_replace_val'), $var);
+		return  preg_replace_callback('/(\$[\w\-\>\.\[\]\:\$@]+)|([\w:]+\(([^\(\)]*|(?R))*\))/', array($this,'_replace_val'), $var);
 	}
 	private function _replace_val($matchs)
 	{
-		if(stripos($matchs[0], '$') === 0)
+		if(strpos($matchs[0], '$') === 0)
 		{
 			return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)/', array($this,'_chack_var_type'), $matchs[0]);
 		}
-		elseif(preg_match('/^([\w]+)::(.+)/', $matchs[0],$sub_matchs))
+		elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0],$summatchs))
+		{
+			return $this->reset_function_tpl($summatchs);
+		}
+		elseif(preg_match('/^([\w]+)::([^\(\)]+)/', $matchs[0],$sub_matchs))
 		{
 			$sub_var = $sub_matchs[2];
 			if(strpos($sub_matchs[2], '.'))
@@ -744,14 +749,7 @@ class ArabTemplate
 			$print = $sub_matchs[1].'::'.$sub_var;unset($sub_var);
 			return $print;
 		}
-		elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0]))
-		{
-			return  preg_replace_callback('/([\w:]+)\((.*)\)/', array($this,'reset_function_tpl'), $matchs[0]);
-		}
-		else 
-		{
-			return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)/', array($this,'_chack_var_type'), $matchs[0]);
-		}
+		return $matchs[0];
 	}
 	/**
 	 * #-------------------------------------------------------------------
@@ -791,7 +789,7 @@ class ArabTemplate
 	 */
 	private function _change_var_data($var,$isObject = false ,$return = false)
 	{
-		$spilter = ($isObject === true?'->':'.');
+		$spilter = ($isObject === true?'->':($isObject == '::'?'::':'.'));
 		if(preg_match_all('/\[(([^\[\]]*|(?R)*)*)\]/', $var,$matchs))
 		{
 			$var = str_replace($matchs[0], str_replace($spilter, '&', $matchs[0]), $var);
@@ -820,7 +818,6 @@ class ArabTemplate
 				}
 				else if($return == false && $index == 0 && preg_match('/^([\w_]+)(\[.+\])/', $val,$matchs))
 				{
-					
 					$sub_var = preg_replace_callback('/\[(([^\[\]]*|(?R)*)*)\]/', array(&$this,'_replace_sub_var'), str_replace('&', $spilter, $matchs[2]));
 					$tags[]  = $this->get_var_tpl($matchs[1]).'->val'.$sub_var;
 				}
@@ -864,6 +861,10 @@ class ArabTemplate
 		if($isObject == true)
 		{
 			return implode('->', $tags);
+		}
+		else if($isObject == '::')
+		{
+			return implode('::', $tags);
 		}
 		else
 		{
