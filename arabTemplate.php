@@ -630,7 +630,7 @@ class ArabTemplate
 		$code 			= preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
 		$code 			= $this->_chang_Syntax($code);
 		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
-		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w:]+)\((.+?)\)\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*((\$?[\w:]+)\((.*|(?R))\))\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
 		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+.*?)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
 		$code 			= str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
 		return $code;
@@ -726,20 +726,28 @@ class ArabTemplate
 	 */
 	private function _replace_var($var)
 	{
-		return  preg_replace_callback('/(\$[\w\-\>\.\[\]\:\$@]+)|([\w:]+\(([^\(\)]*|(?R))*\))/', array($this,'_replace_val'), $var);
+		return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:([\w:]+)\(([^\(\)]*|(?R))\))|([\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this,'_replace_val'), $var);
 	}
 	private function _replace_val($matchs)
 	{
 		if(strpos($matchs[0], '$') === 0)
 		{
-			return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)/', array($this,'_chack_var_type'), $matchs[0]);
+			return  $this->_chack_var_type($matchs);
 		}
-		elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0],$summatchs))
+		elseif(count($matchs) == 4)
 		{
+			return $this->reset_function_tpl(array(1 => $matchs[2],2 => $matchs[3]));
+		}
+		/*elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0],$summatchs))
+		{
+			echo '<pre>';
+			print_r($matchs);
 			return $this->reset_function_tpl($summatchs);
 		}
 		elseif(preg_match('/^([\w]+)::([^\(\)]+)/', $matchs[0],$sub_matchs))
 		{
+			echo '<pre>';
+			print_r($matchs);
 			$sub_var = $sub_matchs[2];
 			if(strpos($sub_matchs[2], '.'))
 			{
@@ -748,7 +756,8 @@ class ArabTemplate
 			}
 			$print = $sub_matchs[1].'::'.$sub_var;unset($sub_var);
 			return $print;
-		}
+		}*/
+		
 		return $matchs[0];
 	}
 	/**
@@ -829,7 +838,7 @@ class ArabTemplate
 						$array   = explode('.',$sub_var);
 						$sub_var  = array_shift($array).$this->_change_var_data(implode('.',$array),false,true);
 					}
-					$class = $this->varTple[$sub_matchs[1]]->val;
+					$class = (isset($this->varTple[$sub_matchs[1]])?$this->varTple[$sub_matchs[1]]->val:$sub_matchs[1]);
 					$tags[] = (is_object($class)?get_class($class):$class).'::'.$sub_var;
 				}
 				else if(is_numeric($val))
@@ -954,7 +963,7 @@ class ArabTemplate
 	 */
 	private function _print_function_var($matchs)
 	{
-		return '<?php echo '.$this->reset_function_tpl(array(1 => $matchs[1],2 => $matchs[2])).';?>';
+		return '<?php echo '.$this->_replace_var($matchs[1]).';?>';
 	}
 	/**
 	 * #-------------------------------------------------------------------
