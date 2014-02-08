@@ -41,7 +41,7 @@ $artpl->setCompileDir('compilers');
 ```code
 $artpl->setCacheDir('caches');
 ```
-
+* * *
 استدعاء القوالب
 
 ```code
@@ -53,7 +53,7 @@ $artpl->display('index');
 ```code
 echo $artpl->fetch('index');
 ```
-
+* * * 
 تمرير المتغيرات للقالب
 
 ```code
@@ -92,7 +92,51 @@ $artpl->assign('obj', 'MyTest' );
 {{MyClass::method('name')}}
 {{$obj::method('name')}}
 ```
+* * *
+استخدام الكلاس داخل القالب
 
+
+
+مثال على الكلاس
+
+```code
+class MyTest
+{
+	public static $Myname = "Mohamedhelal";
+	public static $array  = ['names' => ['first' => 'Mohamed']];
+	public static function setMyName($val)
+	{
+		self::$Myname = $val;
+		return new self();
+	}
+	public function getThis()
+	{
+		return $this;
+	}
+	public function getName()
+	{
+		return self::$Myname;
+	}
+}
+```
+
+وداخل القالب
+```code
+{{$obj::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
+
+```
+
+او
+
+
+```code
+{{MyTest::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
+
+```
+
+
+
+* * *
 استدعاء قوالب داخل القالب
 
 ```code
@@ -145,6 +189,35 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 {{/foreach}}
 ```
 
+عمل تكرار بال key => val
+
+```code
+
+{{foreach $rows as $key => $val}}
+   {{foreachelse}}
+{{/foreach}}
+```
+
+استخدام متغير الكائن
+```code
+
+{{foreach $rows as $row}}
+   {{$row@index}}
+   {{$row@first}}
+   {{$row@last}}
+   {{$row@first}}
+   
+   {{$rows@count()}}
+   
+   {{$row@is_div_by(2)}}
+   
+   {{$row@is_even_by(2)}}
+   
+{{/foreach}}
+```
+
+
+
 استخدام for
 
 ```code
@@ -191,6 +264,13 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 {{$var."MohamedHelal"}}
 ```
 
+التعليقات
+```code
+{{*
+	// تعليقات  لن يتم معلجنها
+	{{$var}}
+*}}
+```
 
 
 عمل وراثة للقالب
