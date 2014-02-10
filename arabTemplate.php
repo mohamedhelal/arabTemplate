@@ -647,7 +647,7 @@ class ArabTemplate
 		$Syntax   		= array
 		(
 			'(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
-			'([^\?{}:]+)\?([^\?{}\:]+)\:([^\?{}\:]+)',
+			'([^'.$this->ldelim.$this->rdelim.']+)\?(.+?):(.+?)',
 			'(IF|ELSEIF)([^\{\}]+)',
 			'(\/IF)',
 			'(\/FOREACH)',
@@ -991,6 +991,7 @@ class ArabTemplate
 		}
 		else if(count($matchs) == 4 && strpos($matchs[0], ':') !== false && strpos($matchs[0], '?') !== false)
 		{
+			
 			return $this->_set_call_ShortIf(array_slice($matchs, 1));
 		}
 	}
@@ -1129,7 +1130,7 @@ class ArabTemplate
 		$foreach.= "\n ".$varval."->first = ".$varval."->index === 0;";
 		$foreach.= "\n ".$varval."->last =".$varval."->index === ".$varval."->count();";
 		if($key != false)
-			$foreach.= "\n ".$varval."->val =". $varval."->key;";
+			$foreach.= "\n ".$this->get_var_tpl($key)."->val =". $varval."->key;";
 		$foreach.="\n?>";
 		$this->open_tag('foreach', array('tag' => 'foreach','from' => $val));
 		return $foreach;
