@@ -252,7 +252,7 @@ class ArabTemplate
 	 */
 	public function setCompileDir($compile_dir)
 	{
-		$this->compile_dir = (is_string($compile_dir) && realpath($compile_dir) != null?realpath($compile_dir).DS:null);
+		$this->compile_dir = rtrim(rtrim($compile_dir,DS),'/').DS;
 	}
 	public function getCompileDir()
 	{
@@ -266,7 +266,7 @@ class ArabTemplate
 	 */
 	public function setCacheDir($cache_dir)
 	{
-		$this->cache_dir = (is_string($cache_dir) && realpath($cache_dir) != null?realpath($cache_dir).DS:null);
+		$this->cache_dir = rtrim(rtrim($cache_dir,DS),'/').DS;
 	}
 	public function getCacheDir()
 	{
@@ -280,7 +280,7 @@ class ArabTemplate
 	 */
 	public function setTemplateDir($template_dir)
 	{
-		$this->template_dir = (!is_string($template_dir)?null:realpath($template_dir).DS);
+		$this->template_dir = realpath($template_dir).DS;
 	}
 	public function getTemplateDir()
 	{
@@ -1217,7 +1217,7 @@ class ArabTemplate
 			$vars = array();
 			foreach ($sub_matchs[1] as $var)
 			{
-				if(!empty($var) && strpos($var, '$') === 0 && !isset($this->varTple[ltrim($var,'$')]))
+				if(!empty($var) && strpos($var, '$') === 0)
 				{
 					$var = ltrim($var,'$');
 					$this->assign($var,null);
