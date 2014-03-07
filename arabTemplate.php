@@ -326,7 +326,7 @@ class ArabTemplate
 		{
 		     
             if(empty($this->compile_dir))$this->compile_dir = 'ArCompiles'.DS;
-			if(!mkdir($this->compile_dir,DIR_WRITE_MODE))
+			if(!@mkdir($this->compile_dir,DIR_WRITE_MODE))
 			{
 				$this->error('Unable To Create Compile Folder\''.$this->compile_dir.'\'');
 			}
@@ -334,7 +334,7 @@ class ArabTemplate
 		else if($this->caching === true && !is_dir($this->cache_dir))
 		{
 		     if(empty($this->cache_dir))$this->cache_dir = 'ArCaches'.DS;
-			if(!mkdir($this->cache_dir,DIR_WRITE_MODE))
+			if(!@mkdir($this->cache_dir,DIR_WRITE_MODE))
 			{
 				$this->error('Unable To Create Caches Folder\''.$this->cache_dir.'\'');
 			}
