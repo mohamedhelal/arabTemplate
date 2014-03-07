@@ -17,6 +17,7 @@
  */
 define('ARAB_TEMPLATE', true);
 if(!defined('DS'))define('DS', DIRECTORY_SEPARATOR);
+if(!defined('DIR_WRITE_MODE'))define('DIR_WRITE_MODE', 0777);
 /**
  * #-------------------------------------------------------------------
  * 	الكلاس الرئيسى للنظام
@@ -74,8 +75,6 @@ class ArabTemplate
 	 * #-------------------------------------------------------------------
 	 */
 	public function __construct(){
-	    $this->rdelim  = preg_quote($this->rdelim);
-		$this->ldelim  = preg_quote($this->ldelim);
 		$this->allowOutPutFile = $this->allowOutPutFile.'_'.get_called_class();
 	}
 	/**
@@ -96,7 +95,7 @@ class ArabTemplate
 	 */
 	private function createTemplateFunctionName()
 	{
-		return ($this->function_prefix.md5($this->createCompileName()));
+		return ($this->function_prefix.md5($this->filename));
 	}
 	/**
 	 * #-------------------------------------------------------------------
@@ -295,7 +294,7 @@ class ArabTemplate
 	{
 	    $filename = ($filename != false?$filename:$this->filename);	
 	    $cache_name = ($cache_name != false?$cache_name:$this->cache_name);
-		$compile  = sha1($filename).str_replace(['\\','/',':','?'], '-', $cache_name.'#'.$filename);
+		$compile  = sha1($filename).str_replace(array('\\','/',':','?'), '-', $cache_name.'#'.$filename);
 		if($type == 'cache')
 		{
 			$compile = $this->cache_dir.str_replace('#', '.cache.', $compile);
@@ -325,16 +324,17 @@ class ArabTemplate
 		}
 		else if( empty($this->compile_dir) || !is_dir($this->compile_dir))
 		{
-		    $this->compile_dir = 'ArCompiles'.DS;
-			if(!mkdir($this->compile_dir,777))
+		     
+            if(empty($this->compile_dir))$this->compile_dir = 'ArCompiles'.DS;
+			if(!mkdir($this->compile_dir,DIR_WRITE_MODE))
 			{
 				$this->error('Unable To Create Compile Folder\''.$this->compile_dir.'\'');
 			}
 		}
 		else if($this->caching === true && !is_dir($this->cache_dir))
 		{
-			$this->cache_dir = 'ArCaches'.DS;
-			if(!mkdir($this->cache_dir,777))
+		     if(empty($this->cache_dir))$this->cache_dir = 'ArCaches'.DS;
+			if(!mkdir($this->cache_dir,DIR_WRITE_MODE))
 			{
 				$this->error('Unable To Create Caches Folder\''.$this->cache_dir.'\'');
 			}
@@ -616,12 +616,14 @@ class ArabTemplate
 	 */
 	private function compileCode($code)
 	{
+		$this->rdelim  = preg_quote($this->rdelim);
+		$this->ldelim  = preg_quote($this->ldelim);
 		$code		   = preg_replace_callback('/'.$this->ldelim.'\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*'.$this->rdelim.'(.*)/is', array(&$this,'_set_extend_data'), $code);
 		$code 		   = preg_replace('/'.$this->ldelim.'\s*extend_([\w]+)\s*'.$this->rdelim.'(.+?|(?R))'.$this->ldelim.'\s*\/extend\s*'.$this->rdelim.'/is','$2', $code);
 		$code		   = preg_replace('/'.$this->ldelim.'\s*INCLUDE_PHP\s+FILE\s*=\s*(?:\'|")(.+?)(?:\'|")\s*'.$this->rdelim.'/i','<?php include("\\1");?>', $code);
 		$setvar_val    = array
 		(
-			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)([^'.$this->ldelim.$this->rdelim.']*|(?R)))',
+			'(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)(.*|(?R)))',
 			'(\+{2})+(\$[\w\.]+)',
 			 '(\-{2})+(\$[\w\.]+)'
 		);
@@ -630,8 +632,8 @@ class ArabTemplate
 		$code 			= preg_replace('/'.$this->ldelim.'\s*(break|continue)\s*'.$this->rdelim.'/i', '<?php $1;?>', $code);
 		$code 			= $this->_chang_Syntax($code);
 		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(?:'.implode('|', $setvar_val).')\s*'.$this->rdelim.'/', array(&$this,'_reset_var_val'), $code);
-		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*((\$?[\w:]+)\((.*|(?R))\))\s*'.$this->rdelim.'/U', array(&$this,'_print_function_var'), $code);
-		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+[^'.$this->ldelim.$this->rdelim.']*)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*((\$?[\w:]+)\((.*|(?R))\))\s*'.$this->rdelim.'/', array(&$this,'_print_function_var'), $code);
+		$code 			= preg_replace_callback('/'.$this->ldelim.'\s*(\$?[\w]+.*?)\s*'.$this->rdelim.'/', array(&$this,'_print_var'), $code);
 		$code 			= str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
 		return $code;
 	}
@@ -902,7 +904,6 @@ class ArabTemplate
 	 */
 	private function _print_var($matchs)
 	{
-	  
 		if(preg_match('/^([\w]+)::(.+)/', $matchs[1],$sub_matchs))
 		{
 			$sub_var = $sub_matchs[2];
@@ -1164,7 +1165,6 @@ class ArabTemplate
 	 */
 	private function _set_call_ShortIf($matchs)
 	{
-	   
 		return '<?php echo (('.$this->_replace_var($matchs[0]).'?'.$this->_replace_var($matchs[1]).':'.$this->_replace_var($matchs[2]).'));?>';
 	}
 	private function _set_call_If($matchs)
