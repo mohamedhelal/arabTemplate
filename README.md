@@ -13,62 +13,62 @@
 
 * * *
 
-```code
+```php
 require 'arabTemplate.php';
 ```
 // انشاء نسخة من الكلاس
 
-```code
+```php
 $artpl = new ArabTemplate();
 ```
 // تعطبل او تفعيل خاصة الكاش
 
-```code
+```php
 $artpl->caching = false;
 ```
 // اضافة مجلد القوالب
 
-```code
+```php
 $artpl->setTemplateDir('templates');
 ```
 // اضافة مجلد الملفات التى تم تحويلها
 
-```code
+```php
 $artpl->setCompileDir('compilers');
 ```
 // اضافة مجلد الكاش
 
-```code
+```php
 $artpl->setCacheDir('caches');
 ```
 * * *
 استدعاء القوالب
 
-```code
+```php
 $artpl->display('index');
 ```
 
 // or 
 
-```code
+```php
 echo $artpl->fetch('index');
 ```
 * * * 
 تمرير المتغيرات للقالب
 
-```code
+```php
 $artpl->assign('obj', 'MyTest' );
 ```
 
 استخدام المتغيرات داخل القالب
 
-```code
+```php
 {{$var}}
 ```
 
 استخدام المصفوفات داخل القالب
 
-```code
+```php
 {{$row.key}}
 {{$row[key]}}
 {{$row[$key.name]}}
@@ -76,7 +76,7 @@ $artpl->assign('obj', 'MyTest' );
 
 استخدام الكلاسات داخل القالب
 
-```code
+```php
 {{$obj->property}}
 {{MyClass::$property}}
 {{MyClass::$property.key.name}}
@@ -86,7 +86,7 @@ $artpl->assign('obj', 'MyTest' );
 
 استخدام الدوال فى القالب
 
-```code
+```php
 {{myName($row,'mohamed')}}
 {{$obj->method('name')}}
 {{MyClass::method('name')}}
@@ -99,7 +99,7 @@ $artpl->assign('obj', 'MyTest' );
 
 مثال على الكلاس
 
-```code
+```php
 class MyTest
 {
 	public static $Myname = "Mohamedhelal";
@@ -121,7 +121,7 @@ class MyTest
 ```
 
 وداخل القالب
-```code
+```php
 {{$obj::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
 
 ```
@@ -129,7 +129,7 @@ class MyTest
 او
 
 
-```code
+```php
 {{MyTest::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
 
 ```
@@ -139,7 +139,7 @@ class MyTest
 * * *
 استدعاء قوالب داخل القالب
 
-```code
+```php
 {{include file="index" caching}}
 // تمرير
 {{include file="index" title="MyPageTitle" caching}}
@@ -171,7 +171,7 @@ $artpl->display('users::index');
 ```
 انشاء المتغيرات فى القالب
 
-```code
+```php
 {{$name = 'mohamed helal'}}
 {{$name = getTemplateVars('name')}}
 {{$i = 2}}
@@ -183,7 +183,7 @@ $artpl->display('users::index');
 
 استخدام داله باسم اخر  فى القالب
 
-```code
+```php
 
 $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 {{ReturnArray($rows)}}
@@ -192,7 +192,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 كتابة كود phpداخل القالب
 
-```code
+```php
 {{php}}
 	$var ='myCodeTest';
 	echo $var ;
@@ -202,7 +202,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 		
 استخدام الوب foreach
 
-```code
+```php
 {{foreach $rows as $row}}
 	{{$row@key}}
    {{foreachelse}{
@@ -215,7 +215,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 عمل تكرار بال key => val
 
-```code
+```php
 
 {{foreach $rows as $key => $val}}
    {{foreachelse}}
@@ -223,7 +223,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 ```
 
 استخدام متغير الكائن
-```code
+```php
 
 {{foreach $rows as $row}}
    {{$row@index}}
@@ -244,7 +244,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 استخدام for
 
-```code
+```php
 	{{for $i = 0;$i < 10;$i++}}
 		{{$i}}
 	{{/for}}
@@ -252,21 +252,21 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 استخدام for متعدده
 
-```code
+```php
 	{{for $i = 0,$j = 0;$i < 10,$j < 10;$i++,$j+=2}}
 		{{$i}}
 		{{$j}}
 	{{/for}}
 ```
 استخدام break|continue
-```code 
+```php 
 {{break|continue}}
 ```
 
 
 استخدام الشروط داخل القالب
 
-```code
+```php
 {{if $name =="mohamed"}}
 // do same thing
 {{elseif $name =="helal"}}
@@ -280,16 +280,16 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 استخدام الشروط القصيرة
 
-```code
+```php
 {{$var == 'mohamed'?true:false}}
 ```
  دمج المتغيرات
-```code
+```php
 {{$var."MohamedHelal"}}
 ```
 
 التعليقات
-```code
+```php
 {{*
 	// تعليقات  لن يتم معلجنها
 	{{$var}}
@@ -301,7 +301,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 parent.tpl
 
-```code
+```php
 <!DOCTYPE html>
 <html>
 <head>
@@ -322,7 +322,7 @@ son.tpl
 هو نفسة الى فى  ملف parent.tpl
 extend_body = body
 او سوفا يظهر خطاء
-```code
+```php
 
 {{extends file="parent"}}
 {{content name = "header"}}
@@ -337,7 +337,7 @@ extend_body = body
 
 الناتج
 
-```code
+```php
 <!DOCTYPE html>
 <html>
 <head>
@@ -356,7 +356,7 @@ extend_body = body
 
 التحقق من وجود ملف الكاش
 
-```code
+```php
 	if($artpl->isCached('index'))
 	{
 		// do same thing
@@ -370,7 +370,7 @@ extend_body = body
 استخدام  القوالب من قاعدة البيانات
 
 
-```code
+```php
 // تمرير داله جلب القالب من قاعدة البيانات و ارجاع القيم المطلوبة
 $artpl->setResource(function($name){
 	$query = mysql_query("select from thems where style ='main' and name ='$name'");
@@ -387,7 +387,7 @@ $artpl->setResource(function($name){
 
 تفعيل هذة الخاصية
 
-```code
+```php
 // تفعيل خاصة كاش لجميع الملفات فى ملف واحد
 $artpl->allow_output_file();
 
@@ -396,7 +396,7 @@ $artpl->allow_output_file();
 هذه الداله مهمتها استدعاء ملف الكاش و عدم تنفيذ اى كود 
 من بعد هذة الداله يعنى هيستدعى ملف الكاش  الى هو ملف واحد  و اى كود استعلام او طباعة او الخ لن يتم استدعاءة
 
-```code
+```php
 // استدعاء هذا الملف  
 $artpl->get_output_file();
 
