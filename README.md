@@ -63,7 +63,7 @@ $artpl->assign('obj', 'MyTest' );
 استخدام المتغيرات داخل القالب
 
 ```code
-{$var}
+{{$var}}
 ```
 
 استخدام المصفوفات داخل القالب
@@ -145,6 +145,30 @@ class MyTest
 {{include file="index" title="MyPageTitle" caching}}
 ```
 
+استدعاء القوالب من مجلدات الموديلات
+
+```php
+$artpl->setModuleDir('test', dirname(__FILE__).'/modules/test/views/');
+$artpl->setModuleDir('users', dirname(__FILE__).'/modules/users/views/');
+
+```
+
+عرض قالب من مجلد الموديل
+
+```php
+$artpl->display('test::index');
+$artpl->display('users::index');
+
+```
+
+او استدعاء قالب داخل  القالب من الموديل
+
+```php
+
+{{include file="test::index" title="MyPageTitle" caching}}
+{{include file="users::index" title="MyPageTitle" caching}}
+
+```
 انشاء المتغيرات فى القالب
 
 ```code
