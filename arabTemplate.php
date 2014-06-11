@@ -37,7 +37,8 @@ class ArabTemplate
 	private static  $functions				= array();
 	private 		$Syntax					= array();
 	private static  $codes					= array();
-	/**
+        private static  $modules                                = array();
+        /**
 	 * #-------------------------------------------------------------------
 	 * باقى المتغيرات الاساسية
 	 * #-------------------------------------------------------------------
@@ -286,6 +287,16 @@ class ArabTemplate
 	{
 		return $this->template_dir;
 	}
+        /**
+	 * #-------------------------------------------------------------------
+	 * اضافة مجلدات الموديلات
+	 * #-------------------------------------------------------------------  
+	 * @param unknown $template_dir
+	 */
+	public function setModuleDir($module,$template_dir)
+	{
+            self::$modules[$module] = realpath($template_dir).DS;
+	}
 	/**
 	 * #-------------------------------------------------------------------
 	 * انشاء اسم للملف المتحويل
@@ -360,6 +371,36 @@ class ArabTemplate
 			}
 			else
 			{
+                             if(($strpos = strpos($this->filename, '::')) !== false)
+                            {
+                                $module   = substr($this->filename,0,$strpos);
+                                $filename = substr($this->filename,($strpos+2));
+                               
+                                
+                                if(!isset(self::$modules[$module]))
+                                {
+                                    $this->error('Unable To Found Module \''.$module.'\'');
+                                }
+                                
+                                $module_path  = self::$modules[$module];
+                                if(!is_dir($module_path))
+                                {
+                                    $this->error('Module Templates Folder \''.$module_path.'\' Not Found');
+                                }
+                                else if(!is_readable($module_path))
+                                {
+                                    $this->error('Module Templates Folder \''.$module_path.'\' Not Readable');
+                                }
+                                
+                                if(is_file($filename = $module_path.$filename))
+                                {
+                                    $this->filename = $filename;
+                                    $this->fileout  = true;
+                                    return true;
+                                }
+                               
+                                
+                            }
 				$this->error('Template File  \''.$this->filename.' \' Not Found');
 			}
 			
@@ -390,7 +431,7 @@ class ArabTemplate
 		$data  .= "\nif(!defined('ARAB_TEMPLATE')) exit('no direct access allowed');";
 		$data  .= "\n// File Content Function ";
 		$data  .= "\nif(!function_exists('".$this->createTemplateFunctionName()."')){\n function ".$this->createTemplateFunctionName()."(\$_artpl){?>\n";
-		$data  .= $source."\n<?php \$_artpl->clearAssign();} } ?>";
+		$data  .= $source."\n<?php } } ?>";
 		file_put_contents($this->createCompileName(), $data);
 		return true;
 	}
@@ -704,6 +745,7 @@ class ArabTemplate
 		{
 			return  '$_artpl->'.$function_name.'('.$this->_replace_var($function_args).')';
 		}
+              
 		return  $function_name.'('.$this->_replace_var($function_args).')';
 	}
 	/**
@@ -727,7 +769,7 @@ class ArabTemplate
 	 */
 	private function _replace_var($var)
 	{
-		return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:([\w:]+)\(([^\(\)]*|(?R))\))|([\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this,'_replace_val'), $var);
+		return  preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:([\w:]+)\((.*|(?R))\))|([\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this,'_replace_val'), $var);
 	}
 	private function _replace_val($matchs)
 	{
@@ -737,27 +779,14 @@ class ArabTemplate
 		}
 		elseif(count($matchs) == 4)
 		{
+                    
 			return $this->reset_function_tpl(array(1 => $matchs[2],2 => $matchs[3]));
 		}
-		/*elseif(preg_match('/([\w:]+)\((.*)\)/', $matchs[0],$summatchs))
+                
+		elseif(preg_match('/^([\w]+)::([^\(\)]*)$/', $matchs[0],$sub_matchs))
 		{
-			echo '<pre>';
-			print_r($matchs);
-			return $this->reset_function_tpl($summatchs);
+                   return $this->_change_var_data($matchs[0]);
 		}
-		elseif(preg_match('/^([\w]+)::([^\(\)]+)/', $matchs[0],$sub_matchs))
-		{
-			echo '<pre>';
-			print_r($matchs);
-			$sub_var = $sub_matchs[2];
-			if(strpos($sub_matchs[2], '.'))
-			{
-				$array   = explode('.',$sub_matchs[2]);
-				$sub_var  = array_shift($array).$this->_change_var_data(implode('.',$array),false,true);unset($array);
-			}
-			$print = $sub_matchs[1].'::'.$sub_var;unset($sub_var);
-			return $print;
-		}*/
 		
 		return $matchs[0];
 	}
@@ -965,6 +994,7 @@ class ArabTemplate
 	 */
 	private function _print_function_var($matchs)
 	{
+            
 		return '<?php echo '.$this->_replace_var($matchs[1]).';?>';
 	}
 	/**
@@ -1008,7 +1038,8 @@ class ArabTemplate
 		$attr     = $this->_get_attr($matchs[2]);
 		if($function == 'assign' && isset($attr['var'],$attr['value']))
 		{
-			return "<?php \$_artpl->assign(".$attr['var'].", ".$attr['value']."); ?>\n";
+                    $attr['value'] = $this->_replace_var(trim(trim($attr['value'],'"'),"'"));
+                    return "<?php \$_artpl->assign(".$attr['var'].", ".$attr['value']."); ?>\n";
 		}
 		else if($function == 'include' || $function == 'fetch')
 		{
