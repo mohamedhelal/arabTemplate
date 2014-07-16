@@ -21,7 +21,7 @@ $artpl->setCacheDir('caches');
 class MyTest
 {
 	public static $Myname = "Mohamedhelal";
-	public static $array  = array('names' => ('first' => 'Mohamed'));
+	public static $array  = array('names' => array('first' => 'Mohamed'));
 	public static function getMyName($val)
 	{
 		return $val;
