@@ -21,7 +21,7 @@ $artpl->setCacheDir('caches');
 class MyTest
 {
 	public static $Myname = "Mohamedhelal";
-	public static $array  = ['names' => ['first' => 'Mohamed']];
+	public static $array  = array('names' => ('first' => 'Mohamed'));
 	public static function getMyName($val)
 	{
 		return $val;
@@ -31,7 +31,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 $rows = array();
 for ($i = 1 ;$i < 10;$i++)
 {
-	$rows[] = ['first' => 'Mohamed-'.$i,'last' => 'Helal - '.$i,'id' => $i];
+	$rows[] = array('first' => 'Mohamed-'.$i,'last' => 'Helal - '.$i,'id' => $i);
 }
 $artpl->assign('rows',$rows);
 $artpl->assign('obj', 'MyTest' );
