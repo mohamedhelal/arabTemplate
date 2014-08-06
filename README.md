@@ -197,7 +197,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
  
         {{function createMenuMapList($row,$mylinks)}}
-        
+        	{{$row->name}} || {{$mylinks}}
         {{/function}}
         
 ```
