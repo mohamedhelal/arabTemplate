@@ -190,6 +190,39 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 {{$myfunc = ReturnArray($rows)}}
 ```
 
+
+انشاء داله داخل القالب
+
+```php
+
+ 
+        {{function createMenuMapList($row,$mylinks)}}
+            {{if $row->he_have_subrows  == true}}
+            <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{$row->name}} <span class="caret"></span></a>
+                    <ul  class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                        {{foreach $mylinks as $mylink}}
+                            {{if $mylink->parentid == $row->id}}
+                                {{createMenuMapList($mylink,$mylinks)}}
+                            {{/if}}
+                        {{/foreach}}
+                    </ul>
+                </li> 
+            {{else}}
+                <li><a href="#">{{$row->name}}</a></li>
+            {{/if}}
+        {{/function}}
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                {{foreach $links as $link}}
+                {{if $menuid == $link->parentid}}
+                     {{createMenuMapList($link,$links)}}
+                  {{/if}}
+                {{/foreach}}
+            </ul>
+
+```
 كتابة كود phpداخل القالب
 
 ```php
