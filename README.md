@@ -102,21 +102,21 @@ $artpl->assign('obj', 'MyTest' );
 ```php
 class MyTest
 {
-	public static $Myname = "Mohamedhelal";
-	public static $array  = ['names' => ['first' => 'Mohamed']];
-	public static function setMyName($val)
-	{
-		self::$Myname = $val;
-		return new self();
-	}
-	public function getThis()
-	{
-		return $this;
-	}
-	public function getName()
-	{
-		return self::$Myname;
-	}
+    public static $Myname = "Mohamedhelal";
+    public static $array  = array('names' => array('first' => 'Mohamed'));
+    public static function setMyName($val)
+    {
+        self::$Myname = $val;
+        return new self();
+    }
+    public function getThis()
+    {
+        return $this;
+    }
+    public function getName()
+    {
+        return self::$Myname;
+    }
 }
 ```
 
@@ -197,31 +197,15 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
  
         {{function createMenuMapList($row,$mylinks)}}
-            {{if $row->he_have_subrows  == true}}
-            <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{$row->name}} <span class="caret"></span></a>
-                    <ul  class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-                        {{foreach $mylinks as $mylink}}
-                            {{if $mylink->parentid == $row->id}}
-                                {{createMenuMapList($mylink,$mylinks)}}
-                            {{/if}}
-                        {{/foreach}}
-                    </ul>
-                </li> 
-            {{else}}
-                <li><a href="#">{{$row->name}}</a></li>
-            {{/if}}
+        
         {{/function}}
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                {{foreach $links as $link}}
-                {{if $menuid == $link->parentid}}
-                     {{createMenuMapList($link,$links)}}
-                  {{/if}}
-                {{/foreach}}
-            </ul>
+        
+```
 
+استدعاء الداله التى تم انشائها داخل القالب
+
+```php
+{{createMenuMapList($row,$mylinks)}}
 ```
 كتابة كود phpداخل القالب
 
