@@ -11,6 +11,7 @@
   #  @copyright  : Mohamed Helal 2010 - 2014
   #--------------------------------------------------------------------------------------
  */
+
 //namespace Araby\Cores;
 
 /**
@@ -46,6 +47,7 @@ class ArabTemplate {
     public static $globals = array();
     private static $templates = array();
     private static $functions = array();
+    protected static $createFunctions = array();
     private $Syntax = array();
     private static $codes = array();
     private static $modules = array();
@@ -402,7 +404,7 @@ class ArabTemplate {
         $data = "<?php \n/**\n * Create By ArabTemplate version " . self::version;
         $data .= "\n * File Name : $filename\n * Create Date : " . date('d/m/Y') . "\n */ \n";
         $data .= "\nif(!defined('ARAB_TEMPLATE')) exit('no direct access allowed');";
-        $data .= "\n// File Content Function ";
+        $data .= "\n// File Content Function \n";
         $data .= "\nif(!function_exists('" . $this->createTemplateFunctionName() . "')){\n function " . $this->createTemplateFunctionName() . "(\$_artpl){?>\n";
         $data .= $source . "\n<?php } } ?>";
         file_put_contents($this->createCompileName(), $data);
@@ -616,12 +618,14 @@ class ArabTemplate {
             '(\$[\w\.]+)(\+{2})+',
         ); //
         $code = preg_replace_callback('/' . $this->ldelim . 'PHP' . $this->rdelim . '(?:(?R)|(.*?))' . $this->ldelim . '\/php' . $this->rdelim . '/is', array($this, '_reset_php_code'), $code);
-        $code = preg_replace_callback('/' . $this->ldelim . 'function\s+([\w]+)\(([^' . $this->ldelim . $this->rdelim . ']*)\)' . $this->rdelim . '/is', array($this, 'createFunctionName'), $code);
-        $code = preg_replace('/' . $this->ldelim . '\/function' . $this->rdelim . '/i', '<?php } ?>', $code);
+        $code = preg_replace_callback('/' . $this->ldelim . 'function\s+([\w]+)\(([^' . $this->ldelim . $this->rdelim . ']*)\)' . $this->rdelim . '(.+)' . $this->ldelim . '\/function' . $this->rdelim . '/is', array($this, 'createFunctionName'), $code);
+
         $code = preg_replace('/' . $this->ldelim . '\*.*?\*' . $this->rdelim . '/s', '', $code);
         $code = preg_replace('/' . $this->ldelim . '\s*(break|continue)\s*' . $this->rdelim . '/i', '<?php $1;?>', $code);
         $code = $this->_chang_Syntax($code);
+
         $code = preg_replace_callback('/' . $this->ldelim . '\s*(?:' . implode('|', $setvar_val) . ')\s*' . $this->rdelim . '/', array(&$this, '_reset_var_val'), $code);
+        $code = preg_replace_callback('/' . $this->ldelim . '\|\s*((\$?[\w:]+)\((.*|(?R))\))\s*\|' . $this->rdelim . '/U', array(&$this, '_notprint_function_var'), $code);
         $code = preg_replace_callback('/' . $this->ldelim . '\s*((\$?[\w:]+)\((.*|(?R))\))\s*' . $this->rdelim . '/U', array(&$this, '_print_function_var'), $code);
         $code = preg_replace_callback('/' . $this->ldelim . '\s*(\$?[\w]+[^' . $this->ldelim . $this->rdelim . ']*)\s*' . $this->rdelim . '/', array(&$this, '_print_var'), $code);
         $code = str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
@@ -877,7 +881,7 @@ class ArabTemplate {
                 $this->assign(ltrim($matchs[1], '$'), null);
                 $set .= "\$_artpl->assign('" . ltrim($matchs[1], '$') . "', null); \n";
             }
-            return $set . $this->_replace_var($matchs[1]) . ' ' . $matchs[2] . ' ' . (isset($matchs[3])?$this->_replace_var($matchs[3]):null) . ';?>';
+            return $set . $this->_replace_var($matchs[1]) . ' ' . $matchs[2] . ' ' . (isset($matchs[3]) ? $this->_replace_var($matchs[3]) : null) . ';?>';
         } else if (count($matchs) == 3 && in_array($matchs[1], array('++', '--'))) {
 
             return '<?php ' . $matchs[1] . $this->_replace_var($matchs[2]) . ';?>';
@@ -894,6 +898,11 @@ class ArabTemplate {
     private function _print_function_var($matchs) {
 
         return '<?php echo ' . $this->_replace_var($matchs[1]) . ';?>';
+    }
+
+    private function _notprint_function_var($matchs) {
+
+        return '<?php  ' . $this->_replace_var($matchs[1]) . ';?>';
     }
 
     /**
@@ -1183,21 +1192,25 @@ class ArabTemplate {
      */
 
     private function createFunctionName($vars) {
-        $func = '<?php  function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &ArabTemplateFile::getInstance();' . "\n";
+        $func = '<?php  function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null?__NAMESPACE__.'\\':null) . 'ArabTemplateFile::getInstance();' . "\n";
+        $func.= '$varTple = $_artpl->varTple;' . "\n";
         $prams = explode(',', $vars[2]);
         foreach ($prams as $prams) {
+            $prams = ltrim($prams, '&');
             if (strpos($prams, '=') !== false) {
                 $explode = explode('=', $prams);
-                $func .= $this->_replace_var($explode[0]) . ' = &' . $explode[0] . ";\n";
+               
+                $func .= '  $_artpl->assign(\'' . trim(ltrim($explode[0], '$')) . '\', ' . $explode[0] . '); '. "\n";
+            } else {
+                $func .= '  $_artpl->assign(\'' . trim(ltrim($prams, '$')) . '\', ' . $prams . '); '. "\n";
             }
-            else
-                {
-                $func .= $this->_replace_var($prams) . ' = &' . $prams . ";\n";
-                }
         }
+
+        $func.= '?>';
+        $func.= $this->compileCode($vars[3]) . '<?php   $_artpl->varTple = $varTple;$varTple = null;  } ?>';
         $prams = null;
         $vars = null;
-        return $func . '?>';
+        return $func;
     }
 
 }
