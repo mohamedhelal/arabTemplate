@@ -193,7 +193,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 ```php
 
-{{!function($var,...)|}}
+{{|function_name($var,...)|}}
 ```
 
 انشاء داله داخل القالب
