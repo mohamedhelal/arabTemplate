@@ -189,7 +189,12 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 {{ReturnArray($rows)}}
 {{$myfunc = ReturnArray($rows)}}
 ```
+استخدام الداله داخل القالب و مع عدم طباعتها
 
+```php
+
+{{!function($var,...)|}}
+```
 
 انشاء داله داخل القالب
 
