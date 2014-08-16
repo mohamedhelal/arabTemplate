@@ -12,14 +12,14 @@
   #--------------------------------------------------------------------------------------
  */
 
-//namespace Araby\Cores;
+#namespace Araby\Cores;
 
 /**
   #--------------------------------------------------------------------------------------
   # حماية الملف
   #--------------------------------------------------------------------------------------
  */
-//defined('BASEPATH') or die('No direct script access.');
+#defined('BASEPATH') or die('No direct script access.');
 /**
   #--------------------------------------------------------------------------------------
   # الثوابت العامة
@@ -405,8 +405,8 @@ class ArabTemplate {
         $data .= "\n * File Name : $filename\n * Create Date : " . date('d/m/Y') . "\n */ \n";
         $data .= "\nif(!defined('ARAB_TEMPLATE')) exit('no direct access allowed');";
         $data .= "\n// File Content Function \n";
-        $data .= "\nif(!function_exists('" . $this->createTemplateFunctionName() . "')){\n function " . $this->createTemplateFunctionName() . "(\$_artpl){?>\n";
-        $data .= $source . "\n<?php } } ?>";
+        $data .= "\nif(!function_exists('" . $this->createTemplateFunctionName() . "')){\n function " . $this->createTemplateFunctionName() . "(&\$_artpl){?>\n";
+        $data .= $source . "\n<?php  \$_artpl->clearAssign();} } ?>";
         file_put_contents($this->createCompileName(), $data);
         return true;
     }
@@ -424,7 +424,6 @@ class ArabTemplate {
                 return true;
             }
         }
-
         $this->getTemplate();
         if (is_file($this->createCompileName())) {
             $filemtime = filemtime($this->createCompileName());
@@ -507,6 +506,7 @@ class ArabTemplate {
         if ($parent === null && ($this instanceof ArabTemplate || $this instanceof ArabTemplateFile || is_subclass_of($this, 'ArabTemplate') )) {
             $parent = $this;
         }
+        $parentvar = $parent->varTple;
         if (isset(self::$templates[$template])) {
             $tpl = self::$templates[$template];
             $parent = $tpl->parent;
@@ -528,11 +528,15 @@ class ArabTemplate {
             $tpl->parent = $parent;
             self::$templates[$template] = $tpl;
         }
+
         if ($merge === true) {
-            $tpl->assign(array_merge($parent->varTple, (array) $data));
-        } else {
+            $tpl->varTple = $parentvar;
+        }
+        if (count($data)) {
             $tpl->assign($data);
         }
+        $parent = null;
+        $parentvar = null;
         return $tpl;
     }
 
@@ -546,7 +550,7 @@ class ArabTemplate {
      * @param string $cache_name
      */
     public function fetch($template, $data = array(), $cache_name = null, $cache_lefttime = false, $merge = true) {
-        $tpl = $this->createTemplate($template . (strpos($template, '.') === false ? $this->extensions : null), $data, $cache_name, $cache_lefttime, $this, $merge);
+        $tpl = $this->createTemplate($template . (strpos($template, '.') === false ? $this->extensions : null), $data, $cache_name, $cache_lefttime, null, $merge);
         ob_start();
         $tpl->getCompilerFile();
         return ob_get_clean();
@@ -582,6 +586,14 @@ class ArabTemplate {
             file_put_contents($this->createCompileName('cache', $cache), $content);
         }
         echo $content;
+    }
+
+    /**
+     * if use like string or try print it
+     * @return null
+     */
+    public function __toString() {
+        return null;
     }
 
     /**
@@ -627,6 +639,7 @@ class ArabTemplate {
         $code = preg_replace_callback('/' . $this->ldelim . '\s*(?:' . implode('|', $setvar_val) . ')\s*' . $this->rdelim . '/', array(&$this, '_reset_var_val'), $code);
         $code = preg_replace_callback('/' . $this->ldelim . '\|\s*((\$?[\w:]+)\((.*|(?R))\))\s*\|' . $this->rdelim . '/U', array(&$this, '_notprint_function_var'), $code);
         $code = preg_replace_callback('/' . $this->ldelim . '\s*((\$?[\w:]+)\((.*|(?R))\))\s*' . $this->rdelim . '/U', array(&$this, '_print_function_var'), $code);
+        $code = preg_replace_callback('/' . $this->ldelim . '\|\s*(\$?[\w_]+[^' . $this->ldelim . $this->rdelim . ']*)\s*\|' . $this->rdelim . '/', array(&$this, '_notprint_var'), $code);
         $code = preg_replace_callback('/' . $this->ldelim . '\s*(\$?[\w]+[^' . $this->ldelim . $this->rdelim . ']*)\s*' . $this->rdelim . '/', array(&$this, '_print_var'), $code);
         $code = str_replace(array_keys(self::$codes), array_values(self::$codes), $code);
         return $code;
@@ -857,6 +870,23 @@ class ArabTemplate {
         return '<?php echo ' . $print . ';?>';
     }
 
+    private function _notprint_var($matchs) {
+
+        if (preg_match('/^([\w]+)::(.+)/', $matchs[1], $sub_matchs)) {
+            $sub_var = $sub_matchs[2];
+            if (strpos($sub_matchs[2], '.')) {
+                $array = explode('.', $sub_matchs[2]);
+                $sub_var = array_shift($array) . $this->_change_var_data(implode('.', $array), false, true);
+                unset($array);
+            }
+            $print = $sub_matchs[1] . '::' . $sub_var;
+            unset($sub_var);
+        } else {
+            $print = $this->_replace_var($matchs[1]);
+        }
+        return '<?php  ' . $print . ';?>';
+    }
+
     /**
      * #-------------------------------------------------------------------
      * انشاء المتغيرات
@@ -877,8 +907,8 @@ class ArabTemplate {
         unset($tags, $mat);
         if (strpos($matchs[1], '$') === 0) {
             $set = '<?php ';
-            if (trim($matchs[2]) == '=' && preg_match('/[a-z0-9_\$]+/i', $matchs[1]) && !isset($this->varTple[ltrim($matchs[1], '$')])) {
-                $this->assign(ltrim($matchs[1], '$'), null);
+            if (trim($matchs[2]) == '=' && preg_match('/[a-z0-9_\$]+/i', $matchs[1])) {
+                //$this->assign(ltrim($matchs[1], '$'), null);
                 $set .= "\$_artpl->assign('" . ltrim($matchs[1], '$') . "', null); \n";
             }
             return $set . $this->_replace_var($matchs[1]) . ' ' . $matchs[2] . ' ' . (isset($matchs[3]) ? $this->_replace_var($matchs[3]) : null) . ';?>';
@@ -896,6 +926,10 @@ class ArabTemplate {
      * #-------------------------------------------------------------------
      */
     private function _print_function_var($matchs) {
+
+        if (method_exists($this, $matchs[2])) {
+            return $this->_notprint_function_var($matchs);
+        }
 
         return '<?php echo ' . $this->_replace_var($matchs[1]) . ';?>';
     }
@@ -1192,17 +1226,17 @@ class ArabTemplate {
      */
 
     private function createFunctionName($vars) {
-        $func = '<?php  function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null?__NAMESPACE__.'\\':null) . 'ArabTemplateFile::getInstance();' . "\n";
+        $func = '<?php  function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
         $func.= '$varTple = $_artpl->varTple;' . "\n";
         $prams = explode(',', $vars[2]);
         foreach ($prams as $prams) {
             $prams = ltrim($prams, '&');
             if (strpos($prams, '=') !== false) {
                 $explode = explode('=', $prams);
-               
-                $func .= '  $_artpl->assign(\'' . trim(ltrim($explode[0], '$')) . '\', ' . $explode[0] . '); '. "\n";
+
+                $func .= '  $_artpl->assign(\'' . trim(ltrim($explode[0], '$')) . '\', ' . $explode[0] . '); ' . "\n";
             } else {
-                $func .= '  $_artpl->assign(\'' . trim(ltrim($prams, '$')) . '\', ' . $prams . '); '. "\n";
+                $func .= '  $_artpl->assign(\'' . trim(ltrim($prams, '$')) . '\', ' . $prams . '); ' . "\n";
             }
         }
 
@@ -1221,7 +1255,11 @@ class ArabTemplate {
  * #-------------------------------------------------------------------
  */
 class ArabTemplateFile extends ArabTemplate {
-    
+
+    public function __toString() {
+        parent::__toString();
+    }
+
 }
 
 /**
