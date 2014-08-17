@@ -74,7 +74,7 @@ class ArabTemplate {
     private $lastupdate = false;
     private $outputFile = 'output_arabtemplate';
     private $allowOutPutFile = false;
-    private $extensions = '.tpl';
+    private $extensions = '.html';
     private $function_prefix = 'template_content_';
     private static $instance = false;
 
@@ -1226,7 +1226,8 @@ class ArabTemplate {
      */
 
     private function createFunctionName($vars) {
-        $func = '<?php  function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
+        
+        $func = '<?php if(!function_exists("' . $vars[1] . '")){'."\n".' function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
         $func.= '$varTple = $_artpl->varTple;' . "\n";
         $prams = explode(',', $vars[2]);
         foreach ($prams as $prams) {
@@ -1241,7 +1242,7 @@ class ArabTemplate {
         }
 
         $func.= '?>';
-        $func.= $this->compileCode($vars[3]) . '<?php   $_artpl->varTple = $varTple;$varTple = null;  } ?>';
+        $func.= $this->compileCode($vars[3]) . '<?php   $_artpl->varTple = $varTple;$varTple = null;  }   } ?>';
         $prams = null;
         $vars = null;
         return $func;
