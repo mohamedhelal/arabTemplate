@@ -29,7 +29,7 @@ define('ARAB_TEMPLATE', true);
 if (!defined('DS'))
     define('DS', DIRECTORY_SEPARATOR);
 if (!defined('DIR_WRITE_MODE'))
-    define('DIR_WRITE_MODE', 0777);
+    define('DIR_WRITE_MODE', 777);
 
 /**
  * #-------------------------------------------------------------------
@@ -307,7 +307,7 @@ class ArabTemplate {
      * @return string
      */
     public function createCompileName($type = false, $filename = false, $cache_name = null) {
-        $filename = ($filename != false ? $filename : $this->filename);
+        $filename = str_replace(array($this->template_dir, $_SERVER["DOCUMENT_ROOT"]), null, ($filename != false ? $filename : $this->filename));
         $cache_name = ($cache_name != false ? $cache_name : $this->cache_name);
         $compile = sha1($filename) . str_replace(array('\\', '/', ':', '?'), '-', $cache_name . '#' . $filename);
         if ($type == 'cache') {
@@ -340,48 +340,50 @@ class ArabTemplate {
             if (!is_dir($this->cache_dir) && !@mkdir($this->cache_dir, DIR_WRITE_MODE)) {
                 $this->error('Unable To Create Caches Folder\'' . $this->cache_dir . '\'');
             }
-        } else {
-            /**
-             * database function to get template from database
-             */
-            if ($this->use_database == true && is_callable($this->use_database_function)) {
+        }
+        /**
+         * database function to get template from database
+         */
+        if ($this->use_database == true && is_callable($this->use_database_function)) {
 
-                $template_data = call_user_func($this->use_database_function, $this->filename);
-                if (is_array($template_data) && isset($template_data['code'], $template_data['lastupdate'])) {
-                    $this->lastupdate = $template_data['lastupdate'];
-                    $this->source = $template_data['code'];
+            $template_data = call_user_func($this->use_database_function, $this->filename);
+            if (is_array($template_data) && isset($template_data['code'], $template_data['lastupdate'])) {
+                $this->lastupdate = $template_data['lastupdate'];
+                $this->source = $template_data['code'];
+                return true;
+            }
+        }
+        if (is_file($this->template_dir . $this->filename)) {
+            $this->fileout = false;
+            $this->filename = $this->template_dir . $this->filename;
+            return true;
+        } else if (is_file($this->filename)) {
+            $this->fileout = true;
+            return true;
+        } else {
+
+            if (($strpos = strpos($this->filename, '::')) !== false) {
+
+                $module = substr($this->filename, 0, $strpos);
+                $filename = substr($this->filename, ($strpos + 2));
+                if (!isset(self::$modules[$module])) {
+                    $this->error('Unable To Found Module \'' . $module . '\'');
+                }
+
+                $module_path = self::$modules[$module];
+                if (!is_dir($module_path)) {
+                    $this->error('Module Templates Folder \'' . $module_path . '\' Not Found');
+                } else if (!is_readable($module_path)) {
+                    $this->error('Module Templates Folder \'' . $module_path . '\' Not Readable');
+                }
+
+                if (is_file($filename = $module_path . $filename)) {
+                    $this->filename = $filename;
+                    $this->fileout = true;
                     return true;
                 }
             }
-            if (is_file($this->template_dir . $this->filename))
-                ;
-            else if (is_file($this->filename)) {
-                $this->fileout = true;
-            } else {
-                if (($strpos = strpos($this->filename, '::')) !== false) {
-                    $module = substr($this->filename, 0, $strpos);
-                    $filename = substr($this->filename, ($strpos + 2));
-
-
-                    if (!isset(self::$modules[$module])) {
-                        $this->error('Unable To Found Module \'' . $module . '\'');
-                    }
-
-                    $module_path = self::$modules[$module];
-                    if (!is_dir($module_path)) {
-                        $this->error('Module Templates Folder \'' . $module_path . '\' Not Found');
-                    } else if (!is_readable($module_path)) {
-                        $this->error('Module Templates Folder \'' . $module_path . '\' Not Readable');
-                    }
-
-                    if (is_file($filename = $module_path . $filename)) {
-                        $this->filename = $filename;
-                        $this->fileout = true;
-                        return true;
-                    }
-                }
-                $this->error('Template File  \'' . $this->filename . ' \' Not Found');
-            }
+            $this->error('Template File  \'' . $this->filename . ' \' Not Found');
         }
     }
 
@@ -392,13 +394,11 @@ class ArabTemplate {
      */
     private function writeCompiler() {
         $filename = $this->filename;
-        if ($this->use_database === true && is_string($this->source))
-            ;
-        else if ($this->fileout === false) {
-            $filename = $this->template_dir . $this->filename;
+        if ($this->use_database === true && is_string($this->source)) {
+            
+        } else {
+
             $this->source = file_get_contents($filename);
-        } else if ($this->fileout === true) {
-            $this->source = file_get_contents($this->filename);
         }
         $source = $this->compileCode($this->source);
         $data = "<?php \n/**\n * Create By ArabTemplate version " . self::version;
@@ -429,7 +429,7 @@ class ArabTemplate {
             $filemtime = filemtime($this->createCompileName());
             if ($this->use_database === true && is_numeric($this->lastupdate) && is_string($this->source) && $this->lastupdate > $filemtime) {
                 unlink($this->createCompileName());
-            } else if ($this->fileout === false && $this->use_database === false && filemtime($this->template_dir . $this->filename) > $filemtime) {
+            } else if ($this->fileout === false && $this->use_database === false && filemtime($this->filename) > $filemtime) {
                 unlink($this->createCompileName());
             } else if ($this->fileout === true && $this->use_database === false && filemtime($this->filename) > $filemtime) {
                 unlink($this->createCompileName());
@@ -444,6 +444,7 @@ class ArabTemplate {
                 }
             }
         }
+
         /**
          * re compiler the file to php code
          */
@@ -1226,8 +1227,8 @@ class ArabTemplate {
      */
 
     private function createFunctionName($vars) {
-        
-        $func = '<?php if(!function_exists("' . $vars[1] . '")){'."\n".' function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
+
+        $func = '<?php if(!function_exists("' . $vars[1] . '")){' . "\n" . ' function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
         $func.= '$varTple = $_artpl->varTple;' . "\n";
         $prams = explode(',', $vars[2]);
         foreach ($prams as $prams) {
