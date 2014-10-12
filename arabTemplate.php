@@ -12,14 +12,14 @@
   #--------------------------------------------------------------------------------------
  */
 
-#namespace Araby\Cores;
+namespace Araby\Cores;
 
 /**
   #--------------------------------------------------------------------------------------
   # حماية الملف
   #--------------------------------------------------------------------------------------
  */
-#defined('BASEPATH') or die('No direct script access.');
+defined('BASEPATH') or die('No direct script access.');
 /**
   #--------------------------------------------------------------------------------------
   # الثوابت العامة
@@ -435,7 +435,7 @@ class ArabTemplate {
                 unlink($this->createCompileName());
             } else {
                 if (!function_exists($this->createTemplateFunctionName())) {
-                    require_once($this->createCompileName());
+                    include_once($this->createCompileName());
                 }
                 if (function_exists($this->createTemplateFunctionName())) {
                     $callname = $this->createTemplateFunctionName();
@@ -449,7 +449,7 @@ class ArabTemplate {
          * re compiler the file to php code
          */
         $this->writeCompiler();
-        require_once($this->createCompileName());
+        include_once($this->createCompileName());
         $callname = $this->createTemplateFunctionName();
         echo $callname($this);
         return true;
@@ -986,6 +986,7 @@ class ArabTemplate {
                 $file = $attr['file'];
                 unset($attr['file']);
             }
+
             $data = false;
             if (count($attr['implodes'])) {
                 foreach ($attr['implodes'] as $index => $val) {
@@ -1003,6 +1004,7 @@ class ArabTemplate {
                     $data.= (count($attr['prams']) ? ',' . implode(",", $attr['prams']) : null);
                 }
             }
+
             $include = '<?php ';
             $include .= ($function == 'include' ? '$_artpl->display' : 'echo $_artpl->fetch') . "(" . $file . $data . ");?>";
             return $include;
@@ -1020,32 +1022,40 @@ class ArabTemplate {
         $tags = array();
         $pattrens = array
             (
-            '(?:([\w\$]+)\s*=\s*(?:[\'|"]?)(?:([^\'"\s]+)|(?R)*)(?:[\'|"]?))',
-            '(?:(?:[\'"])(?:([^\'"]+)|(?R)*)(?:[\'"]))',
-            '([^\s\'\"]+)'
+            '([\w\$]+)\s*=\s*(?:(^[\'"]{1}(?:[^\'"\s]+|(?R))[\'"]{1}$)|([^\s]*|(?R)))',
+            '[\'"]{1}([^\'"]+|(?R))[\'"]{1}',
+            '([^\s\'"]+)'
         );
         if (preg_match_all('/' . implode('|', $pattrens) . '/', $var, $matchs)) {
+
             foreach ($matchs[1] as $index => $val) {
                 if (!empty($val) && !empty($matchs[2][$index]) && strpos($val, '$') === false) {
                     $val_item = $this->_replace_var($matchs[2][$index]);
-                    $tags[$val] = ($val_item == $matchs[2][$index] ? '"' . $matchs[2][$index] . '"' : $val_item);
+                    $eqaul = ($val_item == $matchs[2][$index]);
+                    if ($eqaul) {
+                        $val_item = $this->_replace_var($matchs[2][$index]);
+                    }
+                    $tags[$val] = $val_item;
                     $tags['implodes'][] = "'$val' => $tags[$val]";
-                } else if (!empty($val) && !empty($matchs[2][$index]) && strpos($val, '$') === 0) {
+                } else if (!empty($val) && !empty($matchs[2][$index]) && strpos(ltrim($val), '$') === 0) {
                     $tags[$val] = $matchs[2][$index];
                 }
             }
             foreach ($matchs[3] as $index => $val) {
-                if (!empty($val)) {
+                if (!empty($val) && !empty($matchs[1][$index])) {
                     $val_item = $this->_replace_var($val);
-                    $tags[$index] = ($val_item == $val ? '"' . $val . '"' : $val_item);
+                    $tags[$matchs[1][$index]] = $val_item;
+                    $tags['implodes'][] = "'" . $matchs[1][$index] . "' => " . $tags[$matchs[1][$index]];
                 }
             }
-            foreach ($matchs[4] as $index => $val) {
+            foreach ($matchs[5] as $index => $val) {
                 if (!empty($val)) {
                     $tags['prams'][] = $val;
                 }
             }
         }
+
+
         return $tags;
     }
 
