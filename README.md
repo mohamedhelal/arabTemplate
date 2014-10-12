@@ -143,7 +143,10 @@ class MyTest
 {{include file="index" caching}}
 // تمرير
 {{include file="index" title="MyPageTitle" caching}}
+
+{{include file=$filename title="MyPageTitle" caching}}
 ```
+
 
 استدعاء القوالب من مجلدات الموديلات
 
