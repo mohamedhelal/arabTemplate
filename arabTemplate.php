@@ -11,7 +11,6 @@
   #  @copyright  : Mohamed Helal 2010 - 2014
   #--------------------------------------------------------------------------------------
  */
-
 //namespace Araby\Cores;
 
 /**
@@ -74,7 +73,7 @@ class ArabTemplate {
     private $lastupdate = false;
     private $outputFile = 'output_arabtemplate';
     private $allowOutPutFile = false;
-    private $extensions = '.html';
+    private $extensions = '.tpl';
     private $function_prefix = 'template_content_';
     private static $instance = false;
 
@@ -1027,13 +1026,13 @@ class ArabTemplate {
             '([^\s\'"]+)'
         );
         if (preg_match_all('/' . implode('|', $pattrens) . '/', $var, $matchs)) {
-
+          
             foreach ($matchs[1] as $index => $val) {
                 if (!empty($val) && !empty($matchs[2][$index]) && strpos($val, '$') === false) {
                     $val_item = $this->_replace_var($matchs[2][$index]);
                     $eqaul = ($val_item == $matchs[2][$index]);
                     if ($eqaul) {
-                        $val_item = $this->_replace_var($matchs[2][$index]);
+                        $val_item = $this->_replace_var($matchs[2][$index] );
                     }
                     $tags[$val] = $val_item;
                     $tags['implodes'][] = "'$val' => $tags[$val]";
@@ -1044,7 +1043,7 @@ class ArabTemplate {
             foreach ($matchs[3] as $index => $val) {
                 if (!empty($val) && !empty($matchs[1][$index])) {
                     $val_item = $this->_replace_var($val);
-                    $tags[$matchs[1][$index]] = $val_item;
+                    $tags[$matchs[1][$index]] =  $val_item;
                     $tags['implodes'][] = "'" . $matchs[1][$index] . "' => " . $tags[$matchs[1][$index]];
                 }
             }
