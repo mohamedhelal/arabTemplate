@@ -172,6 +172,41 @@ $artpl->display('users::index');
 {{include file="users::index" title="MyPageTitle" caching}}
 
 ```
+
+استخدام البلوكات 
+
+وتحويل محتوى النص الى قالب للعرض بالمحتوى الى فيه
+
+مثال
+كود صفحة ال php
+```php 
+$rows = array();
+for ($i = 1 ;$i < 10;$i++)
+{
+	$rows[] = (object)array(
+                     'first' => 'Mohamed-'.$i,
+                    'last' => 'Helal - '.$i,
+                    'id' => $i,
+                    'image' => 'MyImage',
+                    'code' =>'
+                        <h1>Code Compiled {{$row_file->first}}</h1>
+                        {{foreach $rows as $row}}
+{{$row->first}}<br/>
+{{myName(($row->first == \'mohamed\'?$row->first:\'mohamed\'),($row->last == \'helal\'?$row->first:\'helal\'))}}
+{{/foreach}}',
+                    'lastupdate' =>(time()-(60*60))
+            );
+}
+$artpl->assign('rows',$rows);
+```
+كود قالب html
+
+```code
+{{foreach $rows as $row_file}}
+{{$_artpl->evalCode($row_file->first,$row_file->code,$row_file->lastupdate)}}
+{{/foreach}}
+```
+
 انشاء المتغيرات فى القالب
 
 ```php
