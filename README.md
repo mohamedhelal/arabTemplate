@@ -201,7 +201,7 @@ $artpl->assign('rows',$rows);
 ```
 كود قالب html
 
-```code
+```php
 {{foreach $rows as $row_file}}
 {{$_artpl->evalCode($row_file->first,$row_file->code,$row_file->lastupdate)}}
 {{/foreach}}
