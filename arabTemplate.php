@@ -1,28 +1,20 @@
 <?php
-
-/**
-  #--------------------------------------------------------------------------------------
-  # نظام قوالب القالب العربى نظام مجانى   لفصل الكود عن البرمجة لتسهيل عمل  المصميمبن و التسهيل على المطورين تطوير برمجياتهم
-  # وممكن ان تقوم بتعديل على الكود كما حب و ستخدمة فى برامجك المجانية و المدفوعة و ممكن ان تقوم بتطويرة و التعديل علة كما تحب
-  #--------------------------------------------------------------------------------------
-  #  @package    :  ArabTemplate the PHP compiling template engine
-  #	@version	: 8
-  #  @author		: Mohamed Helal<mohamedhelal123456@gmail.com>
-  #  @copyright  : Mohamed Helal 2010 - 2014
-  #--------------------------------------------------------------------------------------
+/*
+ * --------------------------------------------------------------------------
+ * ArabFrame An open source application development framework for PHP
+ * --------------------------------------------------------------------------
+ * @package		ArabFrame
+ * @file        Controller.php
+ * @author		Mohamed Helal
+ * @copyright	Copyright (c) 2015
+ * @license		{{@license}}
+ * @link		{{@link}}
+ * @since		Version 1
  */
-#namespace Araby\Cores;
-
 /**
-  #--------------------------------------------------------------------------------------
-  # حماية الملف
-  #--------------------------------------------------------------------------------------
- */
-#defined('BASEPATH') or die('No direct script access.');
-/**
-  #--------------------------------------------------------------------------------------
-  # الثوابت العامة
-  #--------------------------------------------------------------------------------------
+ * #--------------------------------------------------------------------------------------
+ * # الثوابت العامة
+ * #--------------------------------------------------------------------------------------
  */
 define('ARAB_TEMPLATE', true);
 if (!defined('DS'))
@@ -32,10 +24,11 @@ if (!defined('DIR_WRITE_MODE'))
 
 /**
  * #-------------------------------------------------------------------
- * 	الكلاس الرئيسى للنظام
+ *    الكلاس الرئيسى للنظام
  * #-------------------------------------------------------------------
  */
-class ArabTemplate {
+class ArabTemplate
+{
 
     /**
      * #-------------------------------------------------------------------
@@ -91,10 +84,11 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * ثوابت 
+     * ثوابت
      * #-------------------------------------------------------------------
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->rdelim = preg_quote($this->rdelim);
         $this->ldelim = preg_quote($this->ldelim);
         $this->allowOutPutFile = $this->allowOutPutFile . '_' . get_called_class();
@@ -104,47 +98,53 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      *  السماح لعمل كاش لجميع الملفات فى ملف واحد
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      */
-    public function allow_output_file() {
+    public function allow_output_file()
+    {
         ob_start();
         $this->allowOutPutFile = true;
     }
 
-    public static function &getInstance() {
+    public static function &getInstance()
+    {
         return self::$instance;
     }
 
     /**
-      #--------------------------------------------------------------------------------------
-      # اسم داله القالب
-      #--------------------------------------------------------------------------------------
-      # @return string
+     * #--------------------------------------------------------------------------------------
+     * # اسم داله القالب
+     * #--------------------------------------------------------------------------------------
+     * # @return string
      */
-    private function createTemplateFunctionName() {
+    private function createTemplateFunctionName()
+    {
         return ($this->function_prefix . md5($this->filename));
     }
 
     /**
      * #-------------------------------------------------------------------
      *  استدعاء القوالب من قاعدة البيانات
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param unknown $callback
      * @return ArabTemplate
      */
-    public function setResource($callback) {
+    public function setResource($callback)
+    {
         $this->use_database = true;
         $this->use_database_function = $callback;
         return $this;
     }
+
     /**
-     * eval php code in string 
+     * eval php code in string
      * @param type $filename
      * @param type $code
      * @param type $lastUpdate
      */
-    public function evalCode($template,$code,$lastUpdate){
-        
+    public function evalCode($template, $code, $lastUpdate)
+    {
+
         $tpl = $this->createTemplate($template);
         $tpl->eval_php_code = true;
         $tpl->source = $code;
@@ -157,23 +157,25 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      *  اضافة داله باسم اخر
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      * @param unknown $name
      * @param unknown $callback
      * @return ArabTemplate
      */
-    public function setFunction($name, $callback) {
-        self::$functions[(string) $name] = $callback;
+    public function setFunction($name, $callback)
+    {
+        self::$functions[(string)$name] = $callback;
         return $this;
     }
 
     /**
      * #-------------------------------------------------------------------
      *  عرض الاخطاء
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param unknown $error
      */
-    private function error($error) {
+    private function error($error)
+    {
         trigger_error($error);
         die();
     }
@@ -181,12 +183,13 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      *  تمرير المتغيرات للقالب
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param unknown $var
      * @param string $value
      * @return ArabTemplate
      */
-    public function assign($var, $value = null) {
+    public function assign($var, $value = null)
+    {
         if (is_array($var)) {
             foreach ($var as $key => $val) {
                 $this->assign($key, $val);
@@ -209,7 +212,8 @@ class ArabTemplate {
      * @param string $value
      * @return ArabTemplate
      */
-    public function assignByRef($var, &$value = null) {
+    public function assignByRef($var, &$value = null)
+    {
         if (is_array($var)) {
             foreach ($var as $key => &$val) {
                 $this->assignByRef($key, $val);
@@ -227,14 +231,15 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      * حذف جميع المتغير او متغيرات معينة
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      * @param unknown $Assign
      */
-    public function clearAssign($vars = 'all') {
+    public function clearAssign($vars = 'all')
+    {
         if ($vars == 'all')
             $this->varTple = array();
         else if (!empty($vars)) {
-            foreach ((array) $vars as $var) {
+            foreach ((array)$vars as $var) {
                 unset($this->varTple[$var]);
             }
         }
@@ -243,11 +248,12 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      * جلب قيمة من متغيرات القالب
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param string $varname
      * @return multitype:NULL
      */
-    public function getTemplateVars($varname = false) {
+    public function getTemplateVars($varname = false)
+    {
         $values = array();
         if (empty($varname) || $varname === false || is_array($varname)) {
             foreach ($this->varTple as $key => $val) {
@@ -266,63 +272,71 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * اضافة مجلد التحويل 
-     * #-------------------------------------------------------------------  
+     * اضافة مجلد التحويل
+     * #-------------------------------------------------------------------
      * @param unknown $compile_dir
      */
-    public function setCompileDir($compile_dir) {
+    public function setCompileDir($compile_dir)
+    {
         $this->compile_dir = rtrim(rtrim($compile_dir, DS), '/') . DS;
     }
 
-    public function getCompileDir() {
+    public function getCompileDir()
+    {
         return $this->compile_dir;
     }
 
     /**
      * #-------------------------------------------------------------------
      * اضافة مجلد للكاش
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      * @param unknown $cache_dir
      */
-    public function setCacheDir($cache_dir) {
+    public function setCacheDir($cache_dir)
+    {
         $this->cache_dir = rtrim(rtrim($cache_dir, DS), '/') . DS;
     }
 
-    public function getCacheDir() {
+    public function getCacheDir()
+    {
         return $this->cache_dir;
     }
 
     /**
      * #-------------------------------------------------------------------
-     * اضافة مجلد للقوالب 
-     * #-------------------------------------------------------------------  
+     * اضافة مجلد للقوالب
+     * #-------------------------------------------------------------------
      * @param unknown $template_dir
      */
-    public function setTemplateDir($template_dir) {
+    public function setTemplateDir($template_dir)
+    {
         $this->template_dir = realpath($template_dir) . DS;
     }
 
-    public function getTemplateDir() {
+    public function getTemplateDir()
+    {
         return $this->template_dir;
     }
 
     /**
      * #-------------------------------------------------------------------
      * اضافة مجلدات الموديلات
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      * @param unknown $template_dir
      */
-    public function setModuleDir($module, $template_dir) {
+    public function setModuleDir($module, $template_dir)
+    {
         self::$modules[$module] = realpath($template_dir) . DS;
     }
 
     /**
      * #-------------------------------------------------------------------
      * انشاء اسم للملف المتحويل
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      * @return string
      */
-    public function createCompileName($type = false, $filename = false, $cache_name = null) {
+    public function createCompileName($type = false, $filename = false, $cache_name = null)
+    {
         $filename = str_replace(array($this->template_dir, $_SERVER["DOCUMENT_ROOT"]), null, ($filename != false ? $filename : $this->filename));
         $cache_name = ($cache_name != false ? $cache_name : $this->cache_name);
         $compile = sha1($filename) . str_replace(array('\\', '/', ':', '?'), '-', $cache_name . '#' . $filename);
@@ -336,20 +350,23 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * 	التحقق من وجود الملف
-     * #-------------------------------------------------------------------  
+     *    التحقق من وجود الملف
+     * #-------------------------------------------------------------------
      */
-    private function getTemplate() {
+    private function getTemplate()
+    {
         if (!is_dir($this->template_dir) && $this->use_database == false) {
             $this->error('Templates Folder \'' . $this->template_dir . '\' Not Found');
         } else if (!is_readable($this->template_dir) && $this->use_database == false) {
             $this->error('Templates Folder \'' . $this->template_dir . '\' Not Readable');
         } else if (empty($this->compile_dir) || !is_dir($this->compile_dir)) {
+            $old = umask(0);
             if (empty($this->compile_dir))
                 $this->compile_dir = 'ArCompiles' . DS;
             if (!is_dir($this->compile_dir) && !@mkdir($this->compile_dir, DIR_WRITE_MODE)) {
                 $this->error('Unable To Create Compile Folder\'' . $this->compile_dir . '\'');
             }
+            umask($old);
         } else if ($this->caching === true && !is_dir($this->cache_dir)) {
             if (empty($this->cache_dir))
                 $this->cache_dir = 'ArCaches' . DS;
@@ -360,7 +377,7 @@ class ArabTemplate {
         /**
          * if eval code return true
          */
-        if($this->eval_php_code == true){
+        if ($this->eval_php_code == true) {
             return true;
         }
         /**
@@ -414,12 +431,13 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      * كتابة الملف المحول
-     * #-------------------------------------------------------------------  
+     * #-------------------------------------------------------------------
      */
-    private function writeCompiler() {
+    private function writeCompiler()
+    {
         $filename = $this->filename;
         if (($this->use_database === true || $this->eval_php_code == true) && is_string($this->source)) {
-            
+
         } else {
 
             $this->source = file_get_contents($filename);
@@ -431,17 +449,24 @@ class ArabTemplate {
         $data .= "\n// File Content Function \n";
         $data .= "\nif(!function_exists('" . $this->createTemplateFunctionName() . "')){\n function " . $this->createTemplateFunctionName() . "(&\$_artpl){?>\n";
         $data .= $source . "\n<?php  \$_artpl->clearAssign();} } ?>";
-        file_put_contents($this->createCompileName(), $data);
+        if (function_exists('umask')) {
+            $old = umask(0);
+            file_put_contents($this->createCompileName(), $data);
+            umask($old);
+        } else {
+            file_put_contents($this->createCompileName(), $data);
+        }
         return true;
     }
 
     /**
      * #-------------------------------------------------------------------
-     * 	انشاء ملف المحول
-     * #-------------------------------------------------------------------  
+     *    انشاء ملف المحول
+     * #-------------------------------------------------------------------
      * @return boolean
      */
-    public function getCompilerFile() {
+    public function getCompilerFile()
+    {
         if ($this->caching === true && $this->cache_lefttime != false && is_int($this->cache_lefttime) && $this->cache_lefttime > 0) {
             if ((filemtime($this->createCompileName('cache')) + $this->cache_lefttime) >= time()) {
                 require_once($this->createCompileName('cache'));
@@ -453,7 +478,7 @@ class ArabTemplate {
             $filemtime = filemtime($this->createCompileName());
             if ($this->use_database === true && is_numeric($this->lastupdate) && is_string($this->source) && $this->lastupdate > $filemtime) {
                 unlink($this->createCompileName());
-            }else if ($this->eval_php_code === true && is_numeric($this->lastupdate) && is_string($this->source) && $this->lastupdate > $filemtime) {
+            } else if ($this->eval_php_code === true && is_numeric($this->lastupdate) && is_string($this->source) && $this->lastupdate > $filemtime) {
                 unlink($this->createCompileName());
             } else if ($this->fileout === false && ($this->use_database === false && $this->eval_php_code === false) && filemtime($this->filename) > $filemtime) {
                 unlink($this->createCompileName());
@@ -488,7 +513,8 @@ class ArabTemplate {
      * @param string $cache_name
      * @return boolean
      */
-    public function isCached($template, $cache_name = null) {
+    public function isCached($template, $cache_name = null)
+    {
         return (is_file($this->createCompileName('cache', $template, $cache_name)));
     }
 
@@ -497,13 +523,15 @@ class ArabTemplate {
      * @param type $template
      * @param type $cache_name
      */
-    public function clearCache($template, $cache_name = null) {
+    public function clearCache($template, $cache_name = null)
+    {
         if ($this->isCached($template, $cache_name)) {
             unlink($this->createCompileName('cache', $template, $cache_name));
         }
     }
 
-    public function clearAllCache($time = false) {
+    public function clearAllCache($time = false)
+    {
         if ($this->caching == false) {
             return false;
         }
@@ -519,7 +547,8 @@ class ArabTemplate {
         }
     }
 
-    public function isCompiled($template) {
+    public function isCompiled($template)
+    {
         return (is_file($this->createCompileName(false, $template)));
     }
 
@@ -528,7 +557,8 @@ class ArabTemplate {
      * @param type $template
      * @param type $cache_name
      */
-    public function clearCompiled($template) {
+    public function clearCompiled($template)
+    {
         if ($this->isCompiled($template)) {
             unlink($this->createCompileName(false, $template));
         }
@@ -545,11 +575,12 @@ class ArabTemplate {
      * @param string $cache_name
      * @param string $parent
      * @param string $merge
-     * @return  
+     * @return
      */
-    private function createTemplate($template, $data = array(), $cache_name = null, $cache_lefttime = false, $parent = null, $merge = true) {
-        $template = $template.(strpos($template, '.') === false ? $this->extensions : null);
-        if ($parent === null && ($this instanceof ArabTemplate || $this instanceof ArabTemplateFile || is_subclass_of($this, 'ArabTemplate') )) {
+    private function createTemplate($template, $data = array(), $cache_name = null, $cache_lefttime = false, $parent = null, $merge = true)
+    {
+        $template = $template . (strpos($template, '.') === false ? $this->extensions : null);
+        if ($parent === null && ($this instanceof ArabTemplate || $this instanceof ArabTemplateFile || is_subclass_of($this, 'ArabTemplate'))) {
             $parent = $this;
         }
         $parentvar = $parent->varTple;
@@ -589,14 +620,15 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      * عرض القالب
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param string $template
      * @param string $code
      * @param string $lefttime
      * @param string $cache_name
      */
-    public function fetch($template, $data = array(), $cache_name = null, $cache_lefttime = false, $merge = true) {
-        $tpl = $this->createTemplate($template , $data, $cache_name, $cache_lefttime, null, $merge);
+    public function fetch($template, $data = array(), $cache_name = null, $cache_lefttime = false, $merge = true)
+    {
+        $tpl = $this->createTemplate($template, $data, $cache_name, $cache_lefttime, null, $merge);
         ob_start();
         $tpl->getCompilerFile();
         return ob_get_clean();
@@ -611,22 +643,24 @@ class ArabTemplate {
      * @param string $lefttime
      * @param string $cache_name
      */
-    public function display($template, $data = array(), $cache_name = null, $cache_lefttime = false, $merge = true) {
+    public function display($template, $data = array(), $cache_name = null, $cache_lefttime = false, $merge = true)
+    {
         echo $this->fetch($template, $data, $cache_name, $cache_lefttime, $merge);
     }
 
     /**
      * #-------------------------------------------------------------------
-     * 	داله حذف الكلاس
+     *    داله حذف الكلاس
      * #-------------------------------------------------------------------
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         $content = ob_get_clean();
         if (
-                $this->caching === true &&
-                ((!is_subclass_of($this, 'ArabTemplate') && $this->allowOutPutFile === true) ||
+            $this->caching === true &&
+            ((!is_subclass_of($this, 'ArabTemplate') && $this->allowOutPutFile === true) ||
                 (is_object($this->parent) && $this->allowOutPutFile === false)) ||
-                (is_subclass_of($this, 'ArabTemplate') && !($this instanceof ArabTemplateFile) && $this->allowOutPutFile === true)
+            (is_subclass_of($this, 'ArabTemplate') && !($this instanceof ArabTemplateFile) && $this->allowOutPutFile === true)
         ) {
             $cache = ($this->filename == false && $this->allowOutPutFile == true ? $this->outputFile : false);
             file_put_contents($this->createCompileName('cache', $cache), $content);
@@ -638,17 +672,19 @@ class ArabTemplate {
      * if use like string or try print it
      * @return null
      */
-    public function __toString() {
+    public function __toString()
+    {
         return null;
     }
 
     /**
      * #-------------------------------------------------------------------
-     * عرض القالب النهائى 
+     * عرض القالب النهائى
      * #-------------------------------------------------------------------
      * @return boolean
      */
-    public function get_output_file() {
+    public function get_output_file()
+    {
         if ($this->caching === true && $this->allowOutPutFile === true && is_file($this->createCompileName('cache', $this->outputFile))) {
             include_once $this->createCompileName('cache', $this->outputFile);
             exit();
@@ -663,12 +699,13 @@ class ArabTemplate {
      * @param unknown $code
      * @return unknown
      */
-    private function compileCode($code) {
+    private function compileCode($code)
+    {
         $code = preg_replace_callback('/' . $this->ldelim . '\s*extends\s+file\s*=\s*(?:\'|")(.+?)\s*(?:\'|")\s*' . $this->rdelim . '(.*)/is', array(&$this, '_set_extend_data'), $code);
         $code = preg_replace('/' . $this->ldelim . '\s*extend_([\w]+)\s*' . $this->rdelim . '(.+?|(?R))' . $this->ldelim . '\s*\/extend\s*' . $this->rdelim . '/is', '$2', $code);
         $code = preg_replace('/' . $this->ldelim . '\s*INCLUDE_PHP\s+FILE\s*=\s*(?:\'|")(.+?)(?:\'|")\s*' . $this->rdelim . '/i', '<?php include("\\1");?>', $code);
         $setvar_val = array
-            (
+        (
             '(\$[\w\.]+)+(?:\s*([\+|\-|\*|\/]*=)([^' . $this->ldelim . $this->rdelim . ']*|(?R)))',
             '(\+{2})+(\$[\w\.]+)',
             '(\-{2})+(\$[\w\.]+)',
@@ -694,13 +731,14 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      *  تغير الاساسية فى القالب
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param unknown $code
      * @return mixed
      */
-    private function _chang_Syntax($code) {
+    private function _chang_Syntax($code)
+    {
         $Syntax = array
-            (
+        (
             '(FOREACH)\s+(.*|(?R)*)\s+AS\s+(\$[\w]+)(?:\s*=>\s*(\$[\w]+))?',
             '([^' . $this->ldelim . $this->rdelim . ']+)\?(.+?):(.+?)',
             '(IF|ELSEIF)([^\{\}]+)',
@@ -712,7 +750,7 @@ class ArabTemplate {
             '(\/FOR)',
         );
         $system_function = array
-            (
+        (
             'assign',
             'include',
             'fetch'
@@ -726,22 +764,24 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * 	دوال التعامل مع المتغيرات
+     *    دوال التعامل مع المتغيرات
      * #-------------------------------------------------------------------
      */
-    private function get_var_tpl($var) {
+    private function get_var_tpl($var)
+    {
         return "\$_artpl->varTple['$var']";
     }
 
     /**
      * #-------------------------------------------------------------------
-     * 	التحقق من الدوال
+     *    التحقق من الدوال
      * #-------------------------------------------------------------------
      * @param unknown $function_name
      * @param unknown $function_args
      * @return string|mixed
      */
-    public function reset_function_tpl($matchs) {
+    public function reset_function_tpl($matchs)
+    {
         $function_name = $matchs[1];
         $function_args = $matchs[2];
         if (function_exists($function_name)) {
@@ -761,27 +801,30 @@ class ArabTemplate {
     /**
      * #-------------------------------------------------------------------
      * جلب الدوال الى القالب
-     * #------------------------------------------------------------------- 
+     * #-------------------------------------------------------------------
      * @param unknown $callback
      * @param unknown $args
      * @return mixed
      */
-    public function get_function_tpl($callback, $args) {
+    public function get_function_tpl($callback, $args)
+    {
         return call_user_func_array(self::$functions[$callback], $args);
     }
 
     /**
      * #-------------------------------------------------------------------
-     * 	جلب قيمة المتغير من المصفوفة
+     *    جلب قيمة المتغير من المصفوفة
      * #-------------------------------------------------------------------
      * @param unknown $var
      * @return mixed
      */
-    private function _replace_var($var) {
+    private function _replace_var($var)
+    {
         return preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:([\w:]+)\((.*|(?R))\))|([\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this, '_replace_val'), $var);
     }
 
-    private function _replace_val($matchs) {
+    private function _replace_val($matchs)
+    {
         if (strpos($matchs[0], '$') === 0) {
             return $this->_chack_var_type($matchs);
         } elseif (count($matchs) == 4) {
@@ -796,23 +839,25 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * 	تغير قيمة المتغيرات الفرعية
+     *    تغير قيمة المتغيرات الفرعية
      * #-------------------------------------------------------------------
      * @param unknown $matchs
      * @return string
      */
-    private function _replace_sub_var($matchs) {
+    private function _replace_sub_var($matchs)
+    {
         $val = $this->_replace_var($matchs[1]);
         return '[' . (is_numeric($val) ? $val : ($val == $matchs[1] ? "'" . $val . '\'' : $val)) . ']';
     }
 
     /**
      * #-------------------------------------------------------------------
-     * 	داله التحقق من نوع المتغير
-     * #------------------------------------------------------------------- 
+     *    داله التحقق من نوع المتغير
+     * #-------------------------------------------------------------------
      * @param unknown $matchs
      */
-    private function _chack_var_type($matchs) {
+    private function _chack_var_type($matchs)
+    {
         if (preg_match('/^[\w]+\-\>.+/', $matchs[1])) {
             return $this->_change_var_data($matchs[1], true);
         } else {
@@ -822,11 +867,12 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * 	داله تغير المتغيرات
-     * #------------------------------------------------------------------- 
+     *    داله تغير المتغيرات
+     * #-------------------------------------------------------------------
      * @param unknown $var
      */
-    private function _change_var_data($var, $isObject = false, $return = false) {
+    private function _change_var_data($var, $isObject = false, $return = false)
+    {
         $spilter = ($isObject === true ? '->' : ($isObject == '::' ? '::' : '.'));
         if (preg_match_all('/\[(([^\[\]]*|(?R)*)*)\]/', $var, $matchs)) {
             $var = str_replace($matchs[0], str_replace($spilter, '&', $matchs[0]), $var);
@@ -883,11 +929,12 @@ class ArabTemplate {
 
     /**
      * #-------------------------------------------------------------------
-     * 	تغير الكواد ال php
+     *    تغير الكواد ال php
      * #-------------------------------------------------------------------
      */
-    private function _reset_php_code($matchs) {
-        $count = count(self::$codes)? : 0;
+    private function _reset_php_code($matchs)
+    {
+        $count = count(self::$codes) ?: 0;
         $count++;
         $replay = '{#PHPCODE-' . $count . '#}';
         self::$codes[$replay] = "<?php \n" . rtrim(ltrim($matchs[1], '<?php'), '?>') . "\n?>";
@@ -901,7 +948,8 @@ class ArabTemplate {
      * @param unknown $matchs
      * @return string
      */
-    private function _print_var($matchs) {
+    private function _print_var($matchs)
+    {
 
         if (preg_match('/^([\w]+)::(.+)/', $matchs[1], $sub_matchs)) {
             $sub_var = $sub_matchs[2];
@@ -918,7 +966,8 @@ class ArabTemplate {
         return '<?php echo ' . $print . ';?>';
     }
 
-    private function _notprint_var($matchs) {
+    private function _notprint_var($matchs)
+    {
 
         if (preg_match('/^([\w]+)::(.+)/', $matchs[1], $sub_matchs)) {
             $sub_var = $sub_matchs[2];
@@ -942,7 +991,8 @@ class ArabTemplate {
      * @param unknown $matchs
      * @return string|unknown
      */
-    private function _reset_var_val($matchs) {
+    private function _reset_var_val($matchs)
+    {
 
         $tags = array();
         foreach ($matchs as $mat) {
@@ -957,7 +1007,7 @@ class ArabTemplate {
             $set = '<?php ';
             if (trim($matchs[2]) == '=' && preg_match('/[a-z0-9_\$]+/i', $matchs[1])) {
                 //$this->assign(ltrim($matchs[1], '$'), null);
-                $set .= "\$_artpl->assign('" . ltrim($matchs[1], '$') . "', null); \n";
+                $set .= "\$_artpl->assign('" . ltrim($matchs[1], '$') . "',(isset(".$this->_replace_var($matchs[1]).")?".$this->_replace_var($matchs[1]).": null)); \n";
             }
             return $set . $this->_replace_var($matchs[1]) . ' ' . $matchs[2] . ' ' . (isset($matchs[3]) ? $this->_replace_var($matchs[3]) : null) . ';?>';
         } else if (count($matchs) == 3 && in_array($matchs[1], array('++', '--'))) {
@@ -973,7 +1023,8 @@ class ArabTemplate {
      *  طباعة الدوال
      * #-------------------------------------------------------------------
      */
-    private function _print_function_var($matchs) {
+    private function _print_function_var($matchs)
+    {
 
         if (method_exists($this, $matchs[2])) {
             return $this->_notprint_function_var($matchs);
@@ -982,17 +1033,19 @@ class ArabTemplate {
         return '<?php echo ' . $this->_replace_var($matchs[1]) . ';?>';
     }
 
-    private function _notprint_function_var($matchs) {
+    private function _notprint_function_var($matchs)
+    {
 
         return '<?php  ' . $this->_replace_var($matchs[1]) . ';?>';
     }
 
     /**
      * #-------------------------------------------------------------------
-     *  تغير 
+     *  تغير
      * #-------------------------------------------------------------------
      */
-    private function _chack_item_type($matchs) {
+    private function _chack_item_type($matchs)
+    {
         $matchs = array_filter($matchs);
         $krsort = array();
         $index = 0;
@@ -1017,7 +1070,8 @@ class ArabTemplate {
      *  تغير دوال النظام
      * #-------------------------------------------------------------------
      */
-    private function _system_function($matchs) {
+    private function _system_function($matchs)
+    {
         $function = strtolower(trim($matchs[1]));
         $attr = $this->_get_attr($matchs[2]);
         if ($function == 'assign' && isset($attr['var'], $attr['value'])) {
@@ -1044,11 +1098,11 @@ class ArabTemplate {
                 $data = (count($attr['implodes']) ? ",array(" . implode(',', $attr['implodes']) . ")" : false);
                 if (isset($attr['prams']) && count($attr['prams'])) {
                     if (in_array('caching', $attr['prams'])) {
-                        $data.=',true';
+                        $data .= ',true';
                         $sindex = array_search('caching', $attr['prams']);
                         unset($attr['prams'][$sindex]);
                     }
-                    $data.= (count($attr['prams']) ? ',' . implode(",", $attr['prams']) : null);
+                    $data .= (count($attr['prams']) ? ',' . implode(",", $attr['prams']) : null);
                 }
             }
 
@@ -1065,10 +1119,11 @@ class ArabTemplate {
      * @param unknown $var
      * @return multitype:
      */
-    private function _get_attr($var) {
+    private function _get_attr($var)
+    {
         $tags = array();
         $pattrens = array
-            (
+        (
             '([\w\$]+)\s*=\s*(?:(^[\'"]{1}(?:[^\'"\s]+|(?R))[\'"]{1}$)|([^\s]*|(?R)))',
             '[\'"]{1}([^\'"]+|(?R))[\'"]{1}',
             '([^\s\'"]+)'
@@ -1111,9 +1166,10 @@ class ArabTemplate {
      *  تغير الفور اتش
      * #-------------------------------------------------------------------
      */
-    private function _set_call_Foreach($matchs) {
+    private function _set_call_Foreach($matchs)
+    {
         $foreach = "<?php \n ";
-        $foreach.="\$from_fetch = " . $this->_replace_var($matchs[1]);
+        $foreach .= "\$from_fetch = " . $this->_replace_var($matchs[1]);
         if (count($matchs) < 4) {
             $val = ltrim($matchs[2], '$');
             $key = false;
@@ -1122,19 +1178,19 @@ class ArabTemplate {
             $key = ltrim($matchs[2], '$');
         }
         $varval = $this->get_var_tpl($val);
-        $foreach.= ";\n \$_artpl->assign('" . $val . "', null);";
-        $foreach.= "\n " . $varval . "->loop = false;";
+        $foreach .= ";\n \$_artpl->assign('" . $val . "', null);";
+        $foreach .= "\n " . $varval . "->loop = false;";
         if ($key != false)
-            $foreach.= "\n \$_artpl->assign('" . $key . "', null);";
-        $foreach.= "\n if(!is_array(\$from_fetch) && !is_object(\$from_fetch))settype(\$from_fetch,'array');";
-        $foreach.= "\n foreach(\$from_fetch as " . $varval . "->key => " . $varval . "->val){";
-        $foreach.= "\n " . $varval . "->loop = true;";
-        $foreach.= "\n " . $varval . "->index++;";
-        $foreach.= "\n " . $varval . "->first = " . $varval . "->index === 0;";
-        $foreach.= "\n " . $varval . "->last =" . $varval . "->index === " . $varval . "->count();";
+            $foreach .= "\n \$_artpl->assign('" . $key . "', null);";
+        $foreach .= "\n if(!is_array(\$from_fetch) && !is_object(\$from_fetch))settype(\$from_fetch,'array');";
+        $foreach .= "\n foreach(\$from_fetch as " . $varval . "->key => " . $varval . "->val){";
+        $foreach .= "\n " . $varval . "->loop = true;";
+        $foreach .= "\n " . $varval . "->index++;";
+        $foreach .= "\n " . $varval . "->first = " . $varval . "->index === 0;";
+        $foreach .= "\n " . $varval . "->last =" . $varval . "->index === " . $varval . "->count();";
         if ($key != false)
-            $foreach.= "\n " . $this->get_var_tpl($key) . "->val =" . $varval . "->key;";
-        $foreach.="\n?>";
+            $foreach .= "\n " . $this->get_var_tpl($key) . "->val =" . $varval . "->key;";
+        $foreach .= "\n?>";
         $this->open_tag('foreach', array('tag' => 'foreach', 'from' => $val));
         return $foreach;
     }
@@ -1144,7 +1200,8 @@ class ArabTemplate {
      *  تغير الفور اتش الس
      * #-------------------------------------------------------------------
      */
-    private function _set_call_End_Foreachelse($matchs) {
+    private function _set_call_End_Foreachelse($matchs)
+    {
         $data = $this->close_tag('foreach');
         $this->open_tag('foreachelse', $data);
         return "<?php } if(\$_artpl->get_var_tpl('" . $data['from'] . "')->loop == false){?>";
@@ -1155,7 +1212,8 @@ class ArabTemplate {
      *  اغلاق الفواتش
      * #-------------------------------------------------------------------
      */
-    private function _set_call_End_Foreach($matchs) {
+    private function _set_call_End_Foreach($matchs)
+    {
         $data = $this->close_tag(array('foreachelse', 'foreach'));
         return '<?php } ?>';
     }
@@ -1165,12 +1223,14 @@ class ArabTemplate {
      *  تغير الشرط اف
      * #-------------------------------------------------------------------
      */
-    private function _set_call_ShortIf($matchs) {
+    private function _set_call_ShortIf($matchs)
+    {
 
         return '<?php echo ((' . $this->_replace_var($matchs[0]) . '?' . $this->_replace_var($matchs[1]) . ':' . $this->_replace_var($matchs[2]) . '));?>';
     }
 
-    private function _set_call_If($matchs) {
+    private function _set_call_If($matchs)
+    {
         $this->open_tag('if', array('from' => 'if'));
         return '<?php if(' . $this->_replace_var($matchs[1]) . '){?>';
     }
@@ -1180,7 +1240,8 @@ class ArabTemplate {
      *  تغير الشر الس  اف
      * #-------------------------------------------------------------------
      */
-    private function _set_call_Elseif($matchs) {
+    private function _set_call_Elseif($matchs)
+    {
         $this->open_tag('if', array('from' => 'if'));
         return '<?php }elseif(' . $this->_replace_var($matchs[1]) . '){?>';
     }
@@ -1190,7 +1251,8 @@ class ArabTemplate {
      *  تغير اللايلس
      * #-------------------------------------------------------------------
      */
-    private function _set_call_End_Else($matchs) {
+    private function _set_call_End_Else($matchs)
+    {
         return '<?php }else{ ?>';
     }
 
@@ -1199,7 +1261,8 @@ class ArabTemplate {
      *  اغلاق الشرط
      * #-------------------------------------------------------------------
      */
-    private function _set_call_End_If($matchs) {
+    private function _set_call_End_If($matchs)
+    {
         $this->close_tag('if');
         return '<?php } ?>';
     }
@@ -1209,7 +1272,8 @@ class ArabTemplate {
      *  الفور
      * #-------------------------------------------------------------------
      */
-    private function _set_call_For($matchs) {
+    private function _set_call_For($matchs)
+    {
         if (preg_match_all('/(?:(\$[\w]+)\s*([=]+)\s*(?:([^\'";,]+)|(?R)*))+/', $matchs[1], $sub_matchs)) {
             $for = array();
             $vars = array();
@@ -1232,22 +1296,26 @@ class ArabTemplate {
      *  الفور
      * #-------------------------------------------------------------------
      */
-    private function _set_call_End_For($matchs) {
+    private function _set_call_End_For($matchs)
+    {
         return '<?php } ?>';
     }
 
-    private function open_tag($tag, $data) {
+    private function open_tag($tag, $data)
+    {
         array_push($this->Syntax, array('tag' => $tag, 'data' => $data));
     }
 
-    private function close_tag($tags) {
+    private function close_tag($tags)
+    {
         $data = array_pop($this->Syntax);
-        if (in_array($data['tag'], (array) $tags)) {
+        if (in_array($data['tag'], (array)$tags)) {
             return $data['data'];
         }
     }
 
-    private function _set_extend_data($matchs) {
+    private function _set_extend_data($matchs)
+    {
         $layoutfilename = $matchs[1] . (strpos($matchs[1], '.') === false ? $this->extensions : null);
         $layoutcode = false;
         if ($this->use_database == true) {
@@ -1279,10 +1347,11 @@ class ArabTemplate {
      * create function in template
      */
 
-    private function createFunctionName($vars) {
+    private function createFunctionName($vars)
+    {
 
         $func = '<?php if(!function_exists("' . $vars[1] . '")){' . "\n" . ' function ' . $vars[1] . '(' . $vars[2] . '){ $_artpl = &' . (__NAMESPACE__ != null ? __NAMESPACE__ . '\\' : null) . 'ArabTemplateFile::getInstance();' . "\n";
-        $func.= '$varTple = $_artpl->varTple;' . "\n";
+        $func .= '$varTple = $_artpl->varTple;' . "\n";
         $prams = explode(',', $vars[2]);
         foreach ($prams as $prams) {
             $prams = ltrim($prams, '&');
@@ -1295,8 +1364,8 @@ class ArabTemplate {
             }
         }
 
-        $func.= '?>';
-        $func.= $this->compileCode($vars[3]) . '<?php   $_artpl->varTple = $varTple;$varTple = null;  }   } ?>';
+        $func .= '?>';
+        $func .= $this->compileCode($vars[3]) . '<?php   $_artpl->varTple = $varTple;$varTple = null;  }   } ?>';
         $prams = null;
         $vars = null;
         return $func;
@@ -1306,12 +1375,14 @@ class ArabTemplate {
 
 /**
  * #-------------------------------------------------------------------
- * 	كلاس فرعى للنظام
+ *    كلاس فرعى للنظام
  * #-------------------------------------------------------------------
  */
-class ArabTemplateFile extends ArabTemplate {
+class ArabTemplateFile extends ArabTemplate
+{
 
-    public function __toString() {
+    public function __toString()
+    {
         parent::__toString();
     }
 
@@ -1319,10 +1390,11 @@ class ArabTemplateFile extends ArabTemplate {
 
 /**
  * #-------------------------------------------------------------------
- * 	كلاس المتغيرات
+ *    كلاس المتغيرات
  * #-------------------------------------------------------------------
  */
-class ArabTemplateVar {
+class ArabTemplateVar
+{
 
     public $val = null;
     public $loop = false;
@@ -1331,28 +1403,34 @@ class ArabTemplateVar {
     public $last = false;
     public $index = -1;
 
-    public function __construct(&$val) {
+    public function __construct(&$val)
+    {
         $this->val = &$val;
     }
 
-    public function count() {
+    public function count()
+    {
         return (is_array($this->val) || is_object($this->val) ? count($this->val) : 1);
     }
 
-    public function is_div_by($by) {
+    public function is_div_by($by)
+    {
         return ($this->index > 0 && $this->index % $by);
     }
 
-    public function is_even_by($by) {
+    public function is_even_by($by)
+    {
         return ($this->index > 0 && $this->index / $by);
     }
 
-    public function __toString() {
-        return (string) $this->val;
+    public function __toString()
+    {
+        return (string)$this->val;
     }
 
-    public function __destruct() {
-        
+    public function __destruct()
+    {
+
     }
 
 }
