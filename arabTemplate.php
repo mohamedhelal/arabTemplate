@@ -1,18 +1,16 @@
 <?php
 
-/*
- * --------------------------------------------------------------------------
- * ArabFrame An open source application development framework for PHP
- * --------------------------------------------------------------------------
- * @package		ArabFrame
- * @file        Controller.php
- * @author		Mohamed Helal
- * @copyright	Copyright (c) 2015
- * @license		{{@license}}
- * @link		{{@link}}
- * @since		Version 1
+/**
+ #--------------------------------------------------------------------------------------
+ # نظام قوالب القالب العربى نظام مجانى   لفصل الكود عن البرمجة لتسهيل عمل  المصميمبن و التسهيل على المطورين تطوير برمجياتهم
+ # وممكن ان تقوم بتعديل على الكود كما حب و ستخدمة فى برامجك المجانية و المدفوعة و ممكن ان تقوم بتطويرة و التعديل علة كما تحب
+ #--------------------------------------------------------------------------------------
+ #  @package    :  ArabTemplate the PHP compiling template engine
+ #	@version	: 8
+ #  @author		: Mohamed Helal<mohamedhelal123456@gmail.com>
+ #  @copyright  : Mohamed Helal 2010 - 2014
+ #--------------------------------------------------------------------------------------
  */
-
 /**
  * #--------------------------------------------------------------------------------------
  * # الثوابت العامة
@@ -853,9 +851,12 @@ class ArabTemplate {
      * @return mixed
      */
     public function get_function_tpl($callback, $args) {
-        if (!isset($this->functions[$callback])) {
+        if (!isset($this->functions[$callback]) && !function_exists($callback)) {
             return trigger_error('Call to undefined function : " ' . $callback.' " In File " '.$this->filename.'"');
         } else {
+            if(function_exists($callback)){
+                return call_user_func_array($callback, $args);
+            }
             return call_user_func_array($this->functions[$callback], $args);
         }
     }
