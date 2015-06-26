@@ -11,6 +11,7 @@
  #  @copyright  : Mohamed Helal 2010 - 2014
  #--------------------------------------------------------------------------------------
  */
+
 /**
  * #--------------------------------------------------------------------------------------
  * # الثوابت العامة
@@ -756,7 +757,7 @@ class ArabTemplate {
             '(\$[\w\.]+)(\+{2})+',
         ); //
         $code = preg_replace_callback('/' . $this->ldelim . 'PHP' . $this->rdelim . '(?:(?R)|(.*?))' . $this->ldelim . '\/php' . $this->rdelim . '/is', array($this, '_reset_php_code'), $code);
-        $code = preg_replace_callback('/' . $this->ldelim . 'function\s+([\w]+)\(([^' . $this->ldelim . $this->rdelim . ']*)\)' . $this->rdelim . '(.+)' . $this->ldelim . '\/function' . $this->rdelim . '/is', array($this, 'createFunctionName'), $code);
+        $code = preg_replace_callback('/' . $this->ldelim . 'function\s+([\w]+)\(([^' . $this->ldelim . $this->rdelim . ']*)\)' . $this->rdelim . '(.+)' . $this->ldelim . '\/function' . $this->rdelim . '/isU', array($this, 'createFunctionName'), $code);
 
         $code = preg_replace('/' . $this->ldelim . '\*.*?\*' . $this->rdelim . '/s', '', $code);
         $code = preg_replace('/' . $this->ldelim . '\s*(break|continue)\s*' . $this->rdelim . '/i', '<?php $1;?>', $code);
