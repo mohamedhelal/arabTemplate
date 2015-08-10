@@ -11,7 +11,6 @@
  #  @copyright  : Mohamed Helal 2010 - 2014
  #--------------------------------------------------------------------------------------
  */
-
 /**
  * #--------------------------------------------------------------------------------------
  * # الثوابت العامة
@@ -223,7 +222,7 @@ class ArabTemplate {
             }
         } else {
             if ($value instanceof ArabTemplateVar) {
-                $this->varTple[$key] = &$value;
+                $this->varTple[$var] = &$value;
             } else {
                 $this->varTple[$var] = new ArabTemplateVar($value);
             }
@@ -264,7 +263,7 @@ class ArabTemplate {
                 $this->assignPhpRef($key, $val);
             }
         } else {
-            $this->phpVarTpl[$key] = &$value;
+            $this->phpVarTpl[$var] = &$value;
         }
         return $this;
     }
@@ -870,7 +869,7 @@ class ArabTemplate {
      * @return mixed
      */
     private function _replace_var($var) {
-        return preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:([\w]+|[\w]+::[\w]+)\((.*|(?R))\))|([\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this, '_replace_val'), $var);
+        return preg_replace_callback('/\$([\w\-\>\.\[\]\:\$@]+)|(?:(^[\w]+|^[\w]+::[\w]+)\((.*|(?R))\))|(^[\w:]+[\w\-\>\.\[\]\:\$@]+)/', array($this, '_replace_val'), $var);
     }
 
     private function _replace_val($matchs) {
