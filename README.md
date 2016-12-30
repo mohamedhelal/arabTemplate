@@ -1,7 +1,7 @@
 بسم الله الرحمن الرحيم
 ==============
 السلام عليكم ورحمة الله وبركاتة
-نظام قوالب القالب العربى النسخة 8 تم اعادة برمجتها من الصفر و تطويرها فى ارجو من يقوم بتجربتها  بقوم بكتابة الاخطاء التى ظهرة ليه
+نظام قوالب القالب العربى النسخة 10 تم اعادة برمجتها من الصفر و تطويرها فى ارجو من يقوم بتجربتها  بقوم بكتابة الاخطاء التى ظهرة ليه
 
 * * *
 
@@ -21,11 +21,7 @@ require 'arabTemplate.php';
 ```php
 $artpl = new ArabTemplate();
 ```
-// تعطبل او تفعيل خاصة الكاش
 
-```php
-$artpl->caching = false;
-```
 // اضافة مجلد القوالب
 
 ```php
@@ -38,9 +34,6 @@ $artpl->setCompileDir('compilers');
 ```
 // اضافة مجلد الكاش
 
-```php
-$artpl->setCacheDir('caches');
-```
 * * *
 استدعاء القوالب
 
@@ -58,6 +51,7 @@ echo $artpl->fetch('index');
 
 ```php
 $artpl->assign('obj', 'MyTest' );
+$artpl->with('obj', 'MyTest' );
 ```
 
 استخدام المتغيرات داخل القالب
@@ -140,11 +134,11 @@ class MyTest
 استدعاء قوالب داخل القالب
 
 ```php
-{{include file="index" caching}}
-// تمرير
-{{include file="index" title="MyPageTitle" caching}}
+{{include file="index"}}
 
-{{include file=$filename title="MyPageTitle" caching}}
+
+{{include 'index' }}
+{{include $var }}
 ```
 
 
@@ -168,55 +162,22 @@ $artpl->display('users::index');
 
 ```php
 
-{{include file="test::index" title="MyPageTitle" caching}}
-{{include file="users::index" title="MyPageTitle" caching}}
+{{include file="test::index"}}
+{{include $var}}
 
 ```
 
-استخدام البلوكات 
-
-وتحويل محتوى النص الى قالب للعرض بالمحتوى الى فيه
-
-مثال
-كود صفحة ال php
-```php 
-$rows = array();
-for ($i = 1 ;$i < 10;$i++)
-{
-	$rows[] = (object)array(
-                     'first' => 'Mohamed-'.$i,
-                    'last' => 'Helal - '.$i,
-                    'id' => $i,
-                    'image' => 'MyImage',
-                    'code' =>'
-                        <h1>Code Compiled {{$row_file->first}}</h1>
-                        {{foreach $rows as $row}}
-{{$row->first}}<br/>
-{{myName(($row->first == \'mohamed\'?$row->first:\'mohamed\'),($row->last == \'helal\'?$row->first:\'helal\'))}}
-{{/foreach}}',
-                    'lastupdate' =>(time()-(60*60))
-            );
-}
-$artpl->assign('rows',$rows);
-```
-كود قالب html
-
-```php
-{{foreach $rows as $row_file}}
-{{$_artpl->evalCode($row_file->first,$row_file->code,$row_file->lastupdate)}}
-{{/foreach}}
-```
 
 انشاء المتغيرات فى القالب
 
 ```php
 {{$name = 'mohamed helal'}}
-{{$name = getTemplateVars('name')}}
 {{$i = 2}}
 {{++$i}}
 {{--$i}}
 {{$i *= 2}}
-{{assign var="my" value=" MyTest::$array.names.first"}}
+{{assign('my','value')}}
+{{with('my','value')}}
 ```
 
 استخدام داله باسم اخر  فى القالب
@@ -249,14 +210,6 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 
 ```php
 {{createMenuMapList($row,$mylinks)}}
-```
-كتابة كود phpداخل القالب
-
-```php
-{{php}}
-	$var ='myCodeTest';
-	echo $var ;
-{{/php}}
 ```
 
 		
@@ -345,7 +298,7 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 ```
  دمج المتغيرات
 ```php
-{{$var."MohamedHelal"}}
+{{$var ."MohamedHelal"}}
 ```
 
 التعليقات
@@ -366,33 +319,32 @@ parent.tpl
 <html>
 <head>
 <meta charset="UTF-8">
-<title>{{extend_header}}My Default Page  Title {{/extend}}</title>
+<title>{{block 'header'}}My Default Page  Title {{/block}}</title>
 </head>
 <body>
-	{{extend_body}}
+	{{block 'body'}}
 		My Default Page  Content
-	{{/extend}}
+	{{/block}}
 </body>
 </html>
 
 ```
 son.tpl
 
-لازم يكون ال content
-هو نفسة الى فى  ملف parent.tpl
-extend_body = body
-او سوفا يظهر خطاء
 ```php
 
 {{extends file="parent"}}
-{{content name = "header"}}
+{{extends "parent"}}
+{{extends $layout}}
+
+{{block "header"}}
 	My Extend Page Header
-{{/content}}
+{{/block}}
 
 
-{{content name = "body"}}
+{{block "body"}}
 	My Extend Page Content
-{{/content}}
+{{/block}}
 ```
 
 الناتج
@@ -412,52 +364,4 @@ extend_body = body
 
 </body>
 </html>
-```
-
-التحقق من وجود ملف الكاش
-
-```php
-	if($artpl->isCached('index'))
-	{
-		// do same thing
-	}
-	$artpl->display('index');
-```
-
-
-
-
-استخدام  القوالب من قاعدة البيانات
-
-
-```php
-// تمرير داله جلب القالب من قاعدة البيانات و ارجاع القيم المطلوبة
-$artpl->setResource(function($name){
-	$query = mysql_query("select from thems where style ='main' and name ='$name'");
-	$row = mysql_fetch_assoc($query);
-	return array('code' => $row['htmlcontent'],'lastupdate' => $row['lastupdate']);
-});
-```
-
-خاصية الكاش عند تفعيل الكاش هيعمل كاش للناتج المعروض فى المتصفح
-للكل ملف ولكن فى خاصية جديدة وهى انك ممكن تعمل كاش للصفحة  كلها  فى صفحة واحدة
-
-
-
-
-تفعيل هذة الخاصية
-
-```php
-// تفعيل خاصة كاش لجميع الملفات فى ملف واحد
-$artpl->allow_output_file();
-
-```
-وعند تفعيل هذة الخاصية عليك استخدام الداله التالية
-هذه الداله مهمتها استدعاء ملف الكاش و عدم تنفيذ اى كود 
-من بعد هذة الداله يعنى هيستدعى ملف الكاش  الى هو ملف واحد  و اى كود استعلام او طباعة او الخ لن يتم استدعاءة
-
-```php
-// استدعاء هذا الملف  
-$artpl->get_output_file();
-
 ```
