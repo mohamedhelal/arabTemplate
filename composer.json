@@ -1,7 +1,19 @@
 {
-  "name": "mohamedhelal/arabTemplate",
+  "name": "mohamedhelal/arabtemplate",
   "description": " نظام قوالب arabTemplate للتفريق بين الكود و التصميم ",
+  "license": "GPLv2",
+  "authors": [
+    {
+      "name": "Mohamed Helal",
+      "email": "mohamedhelal123456@gmail.com"
+    }
+  ],
   "require": {
     "php": "^5.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "ArTemplate\\": ""
+    }
   }
 }
