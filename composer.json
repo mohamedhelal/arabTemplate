@@ -1,0 +1,7 @@
+{
+  "name": "mohamedhelal/arabTemplate",
+  "description": " نظام قوالب arabTemplate للتفريق بين الكود و التصميم ",
+  "require": {
+    "php": "^5.4"
+  }
+}
