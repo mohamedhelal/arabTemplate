@@ -10,10 +10,10 @@
       "name": "Mohamed Helal",
       "email": "mohamedhelal123456@gmail.com",
       "homepage" : "https://github.com/mohamedhelal/arabTemplate",
-      "role": "Developer"
+
     }
   ],
-  "prefer-stable": false,
+
   "require": {
     "php": ">=5.3.0"
   },
