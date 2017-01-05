@@ -33,14 +33,23 @@ class ArTemplate extends BaseTemplate
     const version = 10;
     const file = 'file';
     const string = 'string';
-    const left = '{{';
-    const right = '}}';
+    const left = '{%';
+    const right = '%}';
 
     /**
      * ArTemplate constructor.
      */
-    public function __construct()
+    public function __construct(array $config = null)
     {
+        if($config)
+        {
+            // add simple config to use in engine.
+            $this->template_dir = $config['template-folder'] ?? null;
+            $this->compiler_dir = $config['compiled-folder'] ?? null;
+            $this->cache_dir    = $config['cache-folder'] ?? null;
+            $this->caching      = $config['caching'] ?? false;
+        }
+
         define('ArTemplate',true);
         if(!defined('DS')){
             define('DS',DIRECTORY_SEPARATOR);
