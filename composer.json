@@ -9,8 +9,6 @@
     {
       "name": "Mohamed Helal",
       "email": "mohamedhelal123456@gmail.com",
-      "homepage" : "https://github.com/mohamedhelal/arabTemplate",
-
     }
   ],
 
@@ -19,7 +17,7 @@
   },
   "autoload": {
     "psr-0": {
-      "ArTemplate": "ArTemplate"
+      "ArTemplate\\": "ArTemplate"
     }
   }
 }
