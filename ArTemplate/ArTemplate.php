@@ -1,30 +1,25 @@
 <?php
-/**
-#--------------------------------------------------------------------------------------
-# نظام قوالب القالب العربى نظام مجانى   لفصل الكود عن البرمجة لتسهيل عمل  المصميمبن و التسهيل على المطورين تطوير برمجياتهم
-# وممكن ان تقوم بتعديل على الكود كما حب و ستخدمة فى برامجك المجانية و المدفوعة و ممكن ان تقوم بتطويرة و التعديل علة كما تحب
-#--------------------------------------------------------------------------------------
-#  @package    :  ArabTemplate the PHP compiling template engine
-#	@version	: 10
-#  @author		: Mohamed Helal<mohamedhelal123456@gmail.com>
-#  @copyright  : Mohamed Helal 2010 - 2016
-#--------------------------------------------------------------------------------------
- */
-/**
- * -----------------------------------
- * File  : ArTemplate.php
- * User  : Mohamed Helal
- * Email : mohamedhelal123456@gmail.com
- * Site  : {URL}
- * -----------------------------------
- */
-
-
-
-
 namespace ArTemplate;
-
-
+/**
+* ArTemplate Class 
+* 
+* Arab Template software Free software to separate the code for programming,
+* to facilitate the work of designers and make it easier for developers to develop their software
+* And possible to modify the code as love and serve him in your software free and paid,
+* and possible that is being developed and edited the bug as you like
+* ---------------------------------------------------------------------------------
+* نظام قوالب القالب العربى نظام مجانى لفصل الكود عن البرمجة لتسهيل عمل  المصممين
+* و التسهيل على المطورين تطوير برمجياتهم
+* وممكن ان تقوم بتعديل على الكود كما حب و ستخدمة فى برامجك المجانية و المدفوعة 
+* و ممكن ان تقوم بتطويرة و التعديل علة كما تحب
+* ---------------------------------------------------------------------------------
+* @package    ArTemplate the PHP compiling template engine
+* @subpackage BaseTemplate
+* @author     Mohamed Helal <mohamedhelal123456@gmail.com>
+* @copyright  Mohamed Helal 2010 - 2016
+* @license    MIT
+* @see        https://github.com/mohamedhelal/arabTemplate/
+*/
 class ArTemplate extends BaseTemplate
 {
     /**
