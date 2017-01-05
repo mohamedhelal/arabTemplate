@@ -1,6 +1,8 @@
 {
   "name": "mohamedhelal/arabtemplate",
   "description": " نظام قوالب arabTemplate للتفريق بين الكود و التصميم ",
+  "description": "SomeLib Framework Template component",
+  "type": "library",
   "license": "GPLv2",
   "version": "1.0.0",
   "authors": [
@@ -9,14 +11,17 @@
       "email": "mohamedhelal123456@gmail.com"
     }
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
-  "require": {
-    "php": "^5.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "ArTemplate\\": ""
-    }
-  }
+  "minimum-stability": "dev",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {
+            "ArTemplate\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.0-dev"
+        }
+}
 }
