@@ -9,30 +9,27 @@
 
 * * *
 
-اولا استدعاء الكلاس و انشاء نسخة من الكلاس
+اولا التثبيت بواسطة مدير الحزم `composer`
 
 * * *
 
-```php
-require 'arabTemplate.php';
+```bash
+composer require mohamedhelal/arabtemplate
 ```
 // انشاء نسخة من الكلاس
 
 ```php
-$artpl = new ArabTemplate();
+$artpl = new \ArTemplate\ArTemplate([
+    // اضافة مجلد القوالب
+    'template-folder' => realpath('path'),
+    // مجلد الملفات المحولة
+    'compiled-folder' => realpath('path'),
+    // تفعيل وإلغاء الكاش
+    'caching'         => false,
+    // مجلد ملفات الكاش
+    'cache-folder'    => realpath('path')
+]);
 ```
-
-// اضافة مجلد القوالب
-
-```php
-$artpl->setTemplateDir('templates');
-```
-// اضافة مجلد الملفات التى تم تحويلها
-
-```php
-$artpl->setCompileDir('compilers');
-```
-// اضافة مجلد الكاش
 
 * * *
 استدعاء القوالب
@@ -57,34 +54,34 @@ $artpl->with('obj', 'MyTest' );
 استخدام المتغيرات داخل القالب
 
 ```php
-{{$var}}
+{% $var %}
 ```
 
 استخدام المصفوفات داخل القالب
 
 ```php
-{{$row.key}}
-{{$row[key]}}
-{{$row[$key.name]}}
+{% $row.key %}
+{% $row[key] %}
+{% $row[$key.name] %}
 ```
 
 استخدام الكلاسات داخل القالب
 
 ```php
-{{$obj->property}}
-{{MyClass::$property}}
-{{MyClass::$property.key.name}}
-{{$obj::$property}}
-{{$obj::$property.key.name}}
+{% $obj->property %}
+{% MyClass::$property %}
+{% MyClass::$property.key.name %}
+{% $obj::$property %}
+{% $obj::$property.key.name %}
 ```
 
 استخدام الدوال فى القالب
 
 ```php
-{{myName($row,'mohamed')}}
-{{$obj->method('name')}}
-{{MyClass::method('name')}}
-{{$obj::method('name')}}
+{% myName($row,'mohamed') %}
+{% $obj->method('name') %}
+{% MyClass::method('name') %}
+{% $obj::method('name') %}
 ```
 * * *
 استخدام الكلاس داخل القالب
@@ -116,7 +113,7 @@ class MyTest
 
 وداخل القالب
 ```php
-{{$obj::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
+{% $obj::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName() %}
 
 ```
 
@@ -124,7 +121,7 @@ class MyTest
 
 
 ```php
-{{MyTest::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName()}}
+{% MyTest::setMyName('Mohamed')->getThis()->getThis()->getThis()->getThis()->getName() %}
 
 ```
 
@@ -134,11 +131,11 @@ class MyTest
 استدعاء قوالب داخل القالب
 
 ```php
-{{include file="index"}}
+{% include file="index" %}
 
 
-{{include 'index' }}
-{{include $var }}
+{% include 'index'  %}
+{% include $var  %}
 ```
 
 
@@ -162,8 +159,8 @@ $artpl->display('users::index');
 
 ```php
 
-{{include file="test::index"}}
-{{include $var}}
+{% include file="test::index" %}
+{% include $var %}
 
 ```
 
@@ -171,13 +168,13 @@ $artpl->display('users::index');
 انشاء المتغيرات فى القالب
 
 ```php
-{{$name = 'mohamed helal'}}
-{{$i = 2}}
-{{++$i}}
-{{--$i}}
-{{$i *= 2}}
-{{assign('my','value')}}
-{{with('my','value')}}
+{% $name = 'mohamed helal' %}
+{% $i = 2 %}
+{% ++$i %}
+{% --$i %}
+{% $i *= 2 %}
+{% assign('my','value') %}
+{% with('my','value') %}
 ```
 
 استخدام داله باسم اخر  فى القالب
@@ -185,14 +182,14 @@ $artpl->display('users::index');
 ```php
 
 $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
-{{ReturnArray($rows)}}
-{{$myfunc = ReturnArray($rows)}}
+{% ReturnArray($rows) %}
+{% $myfunc = ReturnArray($rows) %}
 ```
 استخدام الداله داخل القالب و مع عدم طباعتها
 
 ```php
 
-{{|function_name($var,...)|}}
+{% |function_name($var,...)| %}
 ```
 
 انشاء داله داخل القالب
@@ -200,57 +197,57 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 ```php
 
  
-        {{function createMenuMapList($row,$mylinks)}}
-        	{{$row->name}} || {{$mylinks}}
-        {{/function}}
+        {% function createMenuMapList($row,$mylinks) %}
+        	{% $row->name %} || {% $mylinks %}
+        {% /function %}
         
 ```
 
 استدعاء الداله التى تم انشائها داخل القالب
 
 ```php
-{{createMenuMapList($row,$mylinks)}}
+{% createMenuMapList($row,$mylinks) %}
 ```
 
 		
 استخدام الوب foreach
 
 ```php
-{{foreach $rows as $row}}
-	{{$row@key}}
-   {{foreachelse}{
-{{/foreach}}
+{% foreach $rows as $row %}
+	{% $row@key %}
+   {% foreachelse}{
+{% /foreach %}
 
-{{foreach $rows as $key => $val}}
-   {{foreachelse}}
-{{/foreach}}
+{% foreach $rows as $key => $val %}
+   {% foreachelse %}
+{% /foreach %}
 ```
 
 عمل تكرار بال key => val
 
 ```php
 
-{{foreach $rows as $key => $val}}
-   {{foreachelse}}
-{{/foreach}}
+{% foreach $rows as $key => $val %}
+   {% foreachelse %}
+{% /foreach %}
 ```
 
 استخدام متغير الكائن
 ```php
 
-{{foreach $rows as $row}}
-   {{$row@index}}
-   {{$row@first}}
-   {{$row@last}}
-   {{$row@first}}
+{% foreach $rows as $row %}
+   {% $row@index %}
+   {% $row@first %}
+   {% $row@last %}
+   {% $row@first %}
    
-   {{$rows@count()}}
+   {% $rows@count() %}
    
-   {{$row@is_div_by(2)}}
+   {% $row@is_div_by(2) %}
    
-   {{$row@is_even_by(2)}}
+   {% $row@is_even_by(2) %}
    
-{{/foreach}}
+{% /foreach %}
 ```
 
 
@@ -258,35 +255,35 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 استخدام for
 
 ```php
-	{{for $i = 0;$i < 10;$i++}}
-		{{$i}}
-	{{/for}}
+	{% for $i = 0;$i < 10;$i++ %}
+		{% $i %}
+	{% /for %}
 ```
 
 استخدام for متعدده
 
 ```php
-	{{for $i = 0,$j = 0;$i < 10,$j < 10;$i++,$j+=2}}
-		{{$i}}
-		{{$j}}
-	{{/for}}
+	{% for $i = 0,$j = 0;$i < 10,$j < 10;$i++,$j+=2 %}
+		{% $i %}
+		{% $j %}
+	{% /for %}
 ```
 استخدام break|continue
 ```php 
-{{break|continue}}
+{% break|continue %}
 ```
 
 
 استخدام الشروط داخل القالب
 
 ```php
-{{if $name =="mohamed"}}
+{% if $name =="mohamed" %}
 // do same thing
-{{elseif $name =="helal"}}
+{% elseif $name =="helal" %}
 // do same thing
-{{else}}
+{% else %}
 // do same thing
-{{/if}}
+{% /if %}
 
 ```
 
@@ -294,19 +291,19 @@ $artpl->setFunction('ReturnArray', 'MyTest::getMyName');
 استخدام الشروط القصيرة
 
 ```php
-{{$var == 'mohamed'?true:false}}
+{% $var == 'mohamed'?true:false %}
 ```
  دمج المتغيرات
 ```php
-{{$var ."MohamedHelal"}}
+{% $var ."MohamedHelal" %}
 ```
 
 التعليقات
 ```php
-{{*
+{%*
 	// تعليقات  لن يتم معلجنها
-	{{$var}}
-*}}
+	{% $var %}
+*%}
 ```
 
 
@@ -319,12 +316,12 @@ parent.tpl
 <html>
 <head>
 <meta charset="UTF-8">
-<title>{{block 'header'}}My Default Page  Title {{/block}}</title>
+<title>{% block 'header' %}My Default Page  Title {% /block %}</title>
 </head>
 <body>
-	{{block 'body'}}
+	{% block 'body' %}
 		My Default Page  Content
-	{{/block}}
+	{% /block %}
 </body>
 </html>
 
@@ -333,18 +330,18 @@ son.tpl
 
 ```php
 
-{{extends file="parent"}}
-{{extends "parent"}}
-{{extends $layout}}
+{% extends file="parent" %}
+{% extends "parent" %}
+{% extends $layout %}
 
-{{block "header"}}
+{% block "header" %}
 	My Extend Page Header
-{{/block}}
+{% /block %}
 
 
-{{block "body"}}
+{% block "body" %}
 	My Extend Page Content
-{{/block}}
+{% /block %}
 ```
 
 الناتج
