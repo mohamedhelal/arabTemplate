@@ -43,7 +43,7 @@ class ArTemplate extends BaseTemplate
     {
         if($config)
         {
-            // add simple config to use in engine.
+            // add simple config to use in engine. it well be need php >=v7.0.0
             $this->template_dir = $config['template-folder'] ?? null;
             $this->compiler_dir = $config['compiled-folder'] ?? null;
             $this->cache_dir    = $config['cache-folder'] ?? null;
