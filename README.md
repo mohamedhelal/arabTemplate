@@ -21,13 +21,13 @@ composer require mohamedhelal/arabtemplate
 ```php
 $artpl = new \ArTemplate\ArTemplate([
     // اضافة مجلد القوالب
-    'template-folder' => realpath('path'),
+    'template' => realpath('path'),
     // مجلد الملفات المحولة
-    'compiled-folder' => realpath('path'),
+    'compiler' => realpath('path'),
     // تفعيل وإلغاء الكاش
     'caching'         => false,
     // مجلد ملفات الكاش
-    'cache-folder'    => realpath('path')
+    'cache'    => realpath('path')
 ]);
 ```
 
