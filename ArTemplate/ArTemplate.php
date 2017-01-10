@@ -33,16 +33,17 @@ class ArTemplate extends BaseTemplate
 
     /**
      * ArTemplate constructor.
+     * @param array|null $config
      */
     public function __construct(array $config = null)
     {
         if($config)
         {
             // add simple config to use in engine. it well be need php >=v7.0.0
-            $this->template_dir = $config['template-folder'] ?? null;
-            $this->compiler_dir = $config['compiled-folder'] ?? null;
-            $this->cache_dir    = $config['cache-folder'] ?? null;
-            $this->caching      = $config['caching'] ?? false;
+            $this->template_dir = $config['template'] ?: null;
+            $this->compiler_dir = $config['compiler'] ?: null;
+            $this->cache_dir    = $config['cache'] ?: null;
+            $this->caching      = $config['caching'] ?: false;
         }
 
         define('ArTemplate',true);
@@ -71,7 +72,7 @@ class ArTemplate extends BaseTemplate
      * @return FileTemplate|mixed
      */
     public function createTemplate($template,$data = [] ,$leftTime = false,$type = ArTemplate::file,$parent = null){
-        $tpl = $this->getTemplateObject($template,$data,$leftTime,$type ,$parent);
+        $tpl = $this->getTemplateObject($template,$data,$leftTime,$type ,($parent == null ? $this:$parent));
         $tpl->process();
         return $tpl;
     }
