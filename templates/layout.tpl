@@ -8,9 +8,5 @@
 {{block 'body'}}
     <h1>Body Default</h1>
 {{/block}}
-{{block 'body2'}}
-    <h1>Body Default</h1>
-{{/block}}
-
 </body>
 </html>
