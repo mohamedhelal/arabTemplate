@@ -44,23 +44,6 @@ class DataTemplate
     }
 
     /**
-     * @param $var
-     * @param null $value
-     * @return $this
-     */
-    public function withByRef($var, &$value = null){
-        if (!is_array($var)) {
-            $var = [$var => &$value];
-        }
-        foreach ($var as $key => &$value) {
-            if (!($value instanceof Variables)) {
-                $value = new Variables($value);
-            }
-            $this->varTpl[$key] = $value;
-        }
-        return $this;
-    }
-    /**
      * pass vars data to template
      * @param $var
      * @param null $value
@@ -68,15 +51,6 @@ class DataTemplate
      */
     public function assign($var, $value = null){
         return $this->with($var, $value );
-    }
-    /**
-     * pass vars data to template
-     * @param $var
-     * @param null $value
-     * @return DataTemplate
-     */
-    public function assignByRef($var, &$value = null){
-        return $this->withByRef($var, $value );
     }
     /**
      * @param $var

@@ -31,8 +31,7 @@ class TemplateCompiler
      * @var FileTemplate
      */
     protected $parent = null;
-    protected $parent_name;
-    protected $extends;
+    protected $parentVar = null;
     /**
      * this
      * @var array
@@ -83,16 +82,13 @@ class TemplateCompiler
     public function process()
     {
         if ($this->exists()) {
-            $_arTpl = $this->file;
+            $_arTpl = &$this->file;
             ob_start();
-            include_once($this->getName());
+            require_once($this->getName());
             ob_end_clean();
-            $_arTpl = null;
             $meta = $this->file->getMeta();
-
             if (isset($meta['parent'])) {
                 $this->parent = $this->file->render($meta['parent']);
-
             }
             if (isset($meta['thisBlocks'])) {
                 $this->thisBlock = $meta['thisBlocks'];
@@ -139,7 +135,6 @@ class TemplateCompiler
      */
     public function reCompiler()
     {
-
         $source = $this->replaceSourceCode();
         $content = "<?php\n/**\n* Create By ArabTemplate Version : " . ArTemplate::version . "\n* Created Date : " . date('d/m/Y');
         $content .= "\n* File Path :'" . $this->file->getFullPath() . "'\n*/\n";
@@ -165,7 +160,9 @@ class TemplateCompiler
         $content .= "function " . $this->callBackName() . '(&$_arTpl){?>' . "\n";
         $content .= $source;
         if ($this->parent instanceof FileTemplate) {
-            $content .= "<?php \$_arTpl->getParentExtends()->getContent(true);?>\n";
+            $parent = $this->replaceVarCode($this->parentVar);
+            $parent = ($parent == $this->parentVar ? '"'.$parent.'"' : $parent);
+            $content .= "<?php \$_arTpl->display(" .  $parent . ");?>\n";
         }
         $content .= "\n\n<?php } } ?>";
         if(is_file($this->getName()) && !is_writable($this->getName())){
@@ -192,7 +189,7 @@ class TemplateCompiler
             [$this, 'createDefaultSystem'],
             $source);
         $replaceSourceCode = preg_replace_callback(
-            '#' . ArTemplate::left . '(.+?)' . ArTemplate::right . '#is',
+            '#' . ArTemplate::left . '\s*(.+?)\s*' . ArTemplate::right . '#is',
             [$this, 'geCallFromSystem'],
             $replaceSourceCode);
         return $replaceSourceCode;
@@ -209,7 +206,7 @@ class TemplateCompiler
             $content = '';
             $content .= "if(!function_exists('{$match['name']}')){\n";
             $content .= "function {$match['name']}(" . (empty($match['val']) ? "" : $match['val']) . "){\n";
-            $content .= "\$_arTpl=" . get_class($this->file) . "::getInstance();\n";
+            $content .= "\$_arTpl= clone " . get_class($this->file) . "::getInstance();\n";
             preg_match_all('/\$(?:([\w]+)\s*(?:=\s*(.+))?)/i', $match['val'], $matches);
             if (count($matches[1])) {
                 foreach ($matches[1] as $index => $var) {
@@ -217,7 +214,7 @@ class TemplateCompiler
                 }
             }
             $content .= "?>\n" . $this->replaceSourceCode($match['content']);
-            $content .= "\n<?php } } ?>\n";
+            $content .= "\n<?php \$_arTpl= null; } } ?>\n";
             $this->before[] = $content;
         }
         return null;
@@ -230,7 +227,7 @@ class TemplateCompiler
     public function geCallFromSystem($match)
     {
         $default = [
-            '\s*(?P<var>EXTENDS)\s+(?:FILE=(?P<file>.+)|(?P<file>.+))\s*',
+            '\s*(?P<var>EXTENDS)\s+(?:FILE=(?:(?:\'|")(?P<file>.+?)(?:\'|"))|(?:(?:\'|")(?P<file>.+?)(?:\'|"))|(?P<file>.+))\s*',
             '\s*(?P<var>BLOCK)\s+(?:NAME=(?:(?:\'|")(?P<name>.+?)(?:\'|"))|(?:(?:\'|")(?P<name>.+?)(?:\'|")))\s*',
             '\s*(?P<var>FOREACH)\s+(?P<from>.+?)\s+AS\s+(?:(?:\$(?P<key>[\w]+))\s*=>\s*)?(?:\$(?P<value>[\w]+))',
             '\s*(?P<var>IF|ELSEIF)\s+(?P<condition>.+)',
@@ -244,7 +241,7 @@ class TemplateCompiler
             '\s*(?P<break>(BREAK|CONTINUE))\s*',
             '\s*(?P<print>.+)\s*',
         ];
-        $code = preg_replace_callback('#(?J)' . implode('|', $default) . '#i', [$this, 'getMatch'], $match[1]);
+        $code = preg_replace_callback('#\s*(?J)' . implode('|', $default) . '\s*#i', [$this, 'getMatch'], $match[1]);
         return $code;
     }
 
@@ -406,29 +403,17 @@ class TemplateCompiler
      */
     public function _replace_extends($match)
     {
-
-        $var = $this->replaceVarCode($match['file']);
-        $_arTpl = $this->file;
-        $this->parent_name = $var;
-        eval("\$var = $var;");
-        $this->parent = ArTemplate::$arTemplate->render($var);
+        $_arTpl = &$this->file;
+        $this->parentVar = $match['file'];
+        $file = $this->replaceVarCode($this->parentVar);
+        $file = ($file == $this->parentVar ? '"'.$file.'"' : $file);
+        eval('$file = '.$file.';');
+        $this->parent = $this->file->render($file);
         $this->parentBlocks = $this->getAllParentBlocks();
-        return '<?php $_arTpl->setParentExtends('.$this->parent_name.');?>';
-    }
-    /**
-     * @param $extends
-     */
-    public function setParentExtends($extends){
-        $this->extends = ArTemplate::$arTemplate->render($extends);
+        return null;
     }
 
-    /**
-     * FileTemplate
-     * @return mixed
-     */
-    public function getParentExtends(){
-        return $this->extends;
-    }
+
     /**
      * @param $match
      * @return null
@@ -456,7 +441,7 @@ class TemplateCompiler
         $name = $meta['id'];
         $block_name = $meta['name'];
         $content = "<?php } }\n";
-        if (empty($this->parent) ) {
+        if (empty($this->parent)) {
             $content .= "echo $name(\$_arTpl);\n";
         }
         $content .= "/*{/block '$block_name'}*/\n";

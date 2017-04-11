@@ -33,10 +33,6 @@ class FileTemplate extends BaseTemplate
      */
     protected $compiler;
     /**
-     * @var TemplateCache
-     */
-    protected $cache;
-    /**
      * this template blocks
      * @var array
      */
@@ -68,27 +64,13 @@ class FileTemplate extends BaseTemplate
             $this->template = $this->template . $this->ext;
         }
         $this->compiler = new TemplateCompiler($this);
-        $this->cache = new TemplateCache($this);
         static::$instance = $this;
     }
 
     /**
-     * @param $extends
-     */
-    public function setParentExtends($extends){
-        $this->compiler->setParentExtends($extends);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getParentExtends(){
-        return $this->compiler->getParentExtends();
-    }
-    /**
      * @return FileTemplate
      */
-    public static function getInstance()
+    public static function &getInstance()
     {
         return self::$instance;
     }
@@ -181,7 +163,6 @@ class FileTemplate extends BaseTemplate
     public function process()
     {
         if ($this->exists()) {
-
             $compiler_name = $this->compiler->getName();
             $name = $this->full_path;
             if (!is_file($compiler_name) || (filemtime($name) > filemtime($compiler_name))) {
@@ -199,38 +180,20 @@ class FileTemplate extends BaseTemplate
      */
     public function getContent($display = false)
     {
-        if($this->caching === true && $this->cache->exists()){
-            $cache = $this->cache->getName();
-            $cacheTime = (filemtime($cache) + ($this->leftTime == false ? (7 * 24 * 60 * 60) : $this->leftTime));
-            if($cacheTime >= time()){
-                ob_start();
-                require($cache);
-                if($display == false){
-                    return ob_get_clean();
-                }
-                return '';
-            }else{
-                $this->cache->reCreate();
-            }
-
-        }
         $_arTpl = $this;
         $callback = $this->compiler->callBackName();
         if (!function_exists($callback)) {
             ob_start();
             include_once($this->compiler->getName());
             ob_end_clean();
-        }
-        ob_start();
-        $callback($this);
-        $content = ob_get_clean();
-        if($this->caching === true){
-            $this->cache->create($content);
+
         }
         if ($display === true) {
-            echo $content;
+            $callback($this);
         } else {
-            return $content;
+            ob_start();
+            $callback($this);
+            return ob_get_clean();
         }
     }
 
@@ -242,5 +205,4 @@ class FileTemplate extends BaseTemplate
     {
         return $this->getContent(false);
     }
-
 }
